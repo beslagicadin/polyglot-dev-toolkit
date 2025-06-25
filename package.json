@@ -1,7 +1,7 @@
 {
-  "name": "github-profile-enhancement",
+  "name": "polyglot-dev-toolkit",
   "version": "1.0.0",
-  "description": "A comprehensive project designed to showcase various programming skills and GitHub best practices",
+  "description": "A comprehensive, production-ready toolkit showcasing modern development practices across Python, JavaScript, and Java ecosystems",
   "main": "src/javascript/utils.js",
   "scripts": {
     "test": "jest",
@@ -28,12 +28,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/beslagicadin/new-project.git"
+    "url": "https://github.com/beslagicadin/polyglot-dev-toolkit.git"
   },
   "bugs": {
-    "url": "https://github.com/beslagicadin/new-project/issues"
+    "url": "https://github.com/beslagicadin/polyglot-dev-toolkit/issues"
   },
-  "homepage": "https://github.com/beslagicadin/new-project#readme",
+  "homepage": "https://github.com/beslagicadin/polyglot-dev-toolkit#readme",
   "devDependencies": {
     "jest": "^29.7.0",
     "eslint": "^8.57.0",
