@@ -20,56 +20,58 @@ import requests
 
 class FileManager:
     """Utility class for file operations and management."""
-    
+
     def __init__(self, base_path: str = "."):
         self.base_path = Path(base_path)
         self.logger = self._setup_logger()
-    
+
     def _setup_logger(self) -> logging.Logger:
         """Setup logging configuration."""
         logger = logging.getLogger(__name__)
         logger.setLevel(logging.INFO)
-        
+
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
-        
+
         return logger
-    
+
     def organize_files_by_extension(self, directory: str) -> Dict[str, List[str]]:
         """Organize files in a directory by their extensions."""
         dir_path = Path(directory)
         organized = {}
-        
+
         if not dir_path.exists():
             self.logger.error(f"Directory {directory} does not exist")
             return organized
-        
+
         for file_path in dir_path.iterdir():
             if file_path.is_file():
-                extension = file_path.suffix.lower() or 'no_extension'
+                extension = file_path.suffix.lower() or "no_extension"
                 if extension not in organized:
                     organized[extension] = []
                 organized[extension].append(str(file_path))
-        
-        self.logger.info(f"Organized {sum(len(files) for files in organized.values())} files")
+
+        self.logger.info(
+            f"Organized {sum(len(files) for files in organized.values())} files"
+        )
         return organized
-    
+
     def find_duplicates(self, directory: str) -> Dict[str, List[str]]:
         """Find duplicate files in a directory based on content hash."""
         dir_path = Path(directory)
         hash_dict = {}
         duplicates = {}
-        
+
         if not dir_path.exists():
             self.logger.error(f"Directory {directory} does not exist")
             return duplicates
-        
-        for file_path in dir_path.rglob('*'):
+
+        for file_path in dir_path.rglob("*"):
             if file_path.is_file():
                 try:
                     file_hash = self._calculate_file_hash(file_path)
@@ -81,10 +83,10 @@ class FileManager:
                         hash_dict[file_hash] = str(file_path)
                 except Exception as e:
                     self.logger.error(f"Error processing {file_path}: {e}")
-        
+
         self.logger.info(f"Found {len(duplicates)} sets of duplicate files")
         return duplicates
-    
+
     def _calculate_file_hash(self, file_path: Path) -> str:
         """Calculate SHA256 hash of a file."""
         hash_sha256 = hashlib.sha256()
@@ -96,67 +98,67 @@ class FileManager:
 
 class DataProcessor:
     """Utility class for data processing operations."""
-    
+
     def __init__(self):
         self.logger = self._setup_logger()
-    
+
     def _setup_logger(self) -> logging.Logger:
         """Setup logging configuration."""
         logger = logging.getLogger(f"{__name__}.DataProcessor")
         logger.setLevel(logging.INFO)
         return logger
-    
+
     def csv_to_json(self, csv_file: str, json_file: str) -> bool:
         """Convert CSV file to JSON format."""
         try:
             data = []
-            with open(csv_file, 'r', encoding='utf-8') as csvf:
+            with open(csv_file, "r", encoding="utf-8") as csvf:
                 csv_reader = csv.DictReader(csvf)
                 for row in csv_reader:
                     data.append(row)
-            
-            with open(json_file, 'w', encoding='utf-8') as jsonf:
+
+            with open(json_file, "w", encoding="utf-8") as jsonf:
                 json.dump(data, jsonf, indent=2, ensure_ascii=False)
-            
+
             self.logger.info(f"Successfully converted {csv_file} to {json_file}")
             return True
-            
+
         except Exception as e:
             self.logger.error(f"Error converting CSV to JSON: {e}")
             return False
-    
+
     def json_to_csv(self, json_file: str, csv_file: str) -> bool:
         """Convert JSON file to CSV format."""
         try:
-            with open(json_file, 'r', encoding='utf-8') as jsonf:
+            with open(json_file, "r", encoding="utf-8") as jsonf:
                 data = json.load(jsonf)
-            
+
             if not data:
                 self.logger.warning("No data found in JSON file")
                 return False
-            
+
             if isinstance(data, list) and isinstance(data[0], dict):
                 fieldnames = data[0].keys()
-                
-                with open(csv_file, 'w', newline='', encoding='utf-8') as csvf:
+
+                with open(csv_file, "w", newline="", encoding="utf-8") as csvf:
                     writer = csv.DictWriter(csvf, fieldnames=fieldnames)
                     writer.writeheader()
                     writer.writerows(data)
-                
+
                 self.logger.info(f"Successfully converted {json_file} to {csv_file}")
                 return True
             else:
                 self.logger.error("JSON data must be a list of dictionaries")
                 return False
-                
+
         except Exception as e:
             self.logger.error(f"Error converting JSON to CSV: {e}")
             return False
-    
+
     def validate_json(self, json_file: str) -> bool:
         """Validate JSON file format."""
         try:
-            with open(json_file, 'r', encoding='utf-8') as f:
+            with open(json_file, "r", encoding="utf-8") as f:
                 json.load(f)
             self.logger.info(f"JSON file {json_file} is valid")
             return True
@@ -170,60 +172,61 @@ class DataProcessor:
 
 class SystemMonitor:
     """Utility class for system monitoring operations."""
-    
+
     def __init__(self):
         self.logger = self._setup_logger()
-    
+
     def _setup_logger(self) -> logging.Logger:
         """Setup logging configuration."""
         logger = logging.getLogger(f"{__name__}.SystemMonitor")
         logger.setLevel(logging.INFO)
         return logger
-    
+
     def get_system_info(self) -> Dict[str, Any]:
         """Get basic system information."""
         import platform
         import psutil
-        
+
         try:
             info = {
-                'platform': platform.system(),
-                'platform_release': platform.release(),
-                'platform_version': platform.version(),
-                'architecture': platform.machine(),
-                'processor': platform.processor(),
-                'cpu_count': psutil.cpu_count(),
-                'memory_total': psutil.virtual_memory().total,
-                'memory_available': psutil.virtual_memory().available,
-                'disk_usage': psutil.disk_usage('/').percent,
-                'timestamp': datetime.now().isoformat()
+                "platform": platform.system(),
+                "platform_release": platform.release(),
+                "platform_version": platform.version(),
+                "architecture": platform.machine(),
+                "processor": platform.processor(),
+                "cpu_count": psutil.cpu_count(),
+                "memory_total": psutil.virtual_memory().total,
+                "memory_available": psutil.virtual_memory().available,
+                "disk_usage": psutil.disk_usage("/").percent,
+                "timestamp": datetime.now().isoformat(),
             }
-            
+
             self.logger.info("Successfully retrieved system information")
             return info
-            
+
         except Exception as e:
             self.logger.error(f"Error getting system info: {e}")
             return {}
-    
-    def check_disk_space(self, path: str = '/') -> Dict[str, Any]:
+
+    def check_disk_space(self, path: str = "/") -> Dict[str, Any]:
         """Check disk space for given path."""
         try:
             import psutil
+
             usage = psutil.disk_usage(path)
-            
+
             result = {
-                'path': path,
-                'total': usage.total,
-                'used': usage.used,
-                'free': usage.free,
-                'percentage_used': (usage.used / usage.total) * 100,
-                'timestamp': datetime.now().isoformat()
+                "path": path,
+                "total": usage.total,
+                "used": usage.used,
+                "free": usage.free,
+                "percentage_used": (usage.used / usage.total) * 100,
+                "timestamp": datetime.now().isoformat(),
             }
-            
+
             self.logger.info(f"Disk usage for {path}: {result['percentage_used']:.1f}%")
             return result
-            
+
         except Exception as e:
             self.logger.error(f"Error checking disk space: {e}")
             return {}
@@ -231,62 +234,66 @@ class SystemMonitor:
 
 class WebScraper:
     """Utility class for web scraping operations."""
-    
+
     def __init__(self, timeout: int = 30):
         self.timeout = timeout
         self.session = requests.Session()
         self.logger = self._setup_logger()
-    
+
     def _setup_logger(self) -> logging.Logger:
         """Setup logging configuration."""
         logger = logging.getLogger(f"{__name__}.WebScraper")
         logger.setLevel(logging.INFO)
         return logger
-    
-    def fetch_url(self, url: str, headers: Optional[Dict[str, str]] = None) -> Optional[str]:
+
+    def fetch_url(
+        self, url: str, headers: Optional[Dict[str, str]] = None
+    ) -> Optional[str]:
         """Fetch content from a URL."""
         try:
             default_headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
             }
-            
+
             if headers:
                 default_headers.update(headers)
-            
-            response = self.session.get(url, headers=default_headers, timeout=self.timeout)
+
+            response = self.session.get(
+                url, headers=default_headers, timeout=self.timeout
+            )
             response.raise_for_status()
-            
+
             self.logger.info(f"Successfully fetched {url}")
             return response.text
-            
+
         except requests.exceptions.RequestException as e:
             self.logger.error(f"Error fetching {url}: {e}")
             return None
-    
+
     def check_url_status(self, url: str) -> Dict[str, Any]:
         """Check the status of a URL."""
         try:
             response = self.session.head(url, timeout=self.timeout)
-            
+
             result = {
-                'url': url,
-                'status_code': response.status_code,
-                'is_accessible': response.status_code == 200,
-                'headers': dict(response.headers),
-                'timestamp': datetime.now().isoformat()
+                "url": url,
+                "status_code": response.status_code,
+                "is_accessible": response.status_code == 200,
+                "headers": dict(response.headers),
+                "timestamp": datetime.now().isoformat(),
             }
-            
+
             self.logger.info(f"URL {url} status: {response.status_code}")
             return result
-            
+
         except requests.exceptions.RequestException as e:
             self.logger.error(f"Error checking {url}: {e}")
             return {
-                'url': url,
-                'status_code': None,
-                'is_accessible': False,
-                'error': str(e),
-                'timestamp': datetime.now().isoformat()
+                "url": url,
+                "status_code": None,
+                "is_accessible": False,
+                "error": str(e),
+                "timestamp": datetime.now().isoformat(),
             }
 
 
@@ -294,18 +301,18 @@ def main():
     """Main function to demonstrate the utilities."""
     print("Python Utilities Demo")
     print("====================\n")
-    
+
     # File Manager Demo
     print("1. File Manager Demo:")
     fm = FileManager()
     current_dir = os.getcwd()
     organized = fm.organize_files_by_extension(current_dir)
     print(f"Found {len(organized)} different file types in current directory")
-    
+
     # Data Processor Demo
     print("\n2. Data Processor Demo:")
     dp = DataProcessor()
-    
+
     # System Monitor Demo
     print("\n3. System Monitor Demo:")
     sm = SystemMonitor()
@@ -316,13 +323,13 @@ def main():
             print(f"CPU Count: {system_info.get('cpu_count', 'Unknown')}")
     except ImportError:
         print("psutil not installed - skipping system monitor demo")
-    
+
     # Web Scraper Demo
     print("\n4. Web Scraper Demo:")
     ws = WebScraper()
     status = ws.check_url_status("https://httpbin.org/status/200")
     print(f"Test URL status: {status.get('status_code', 'Error')}")
-    
+
     print("\nDemo completed!")
 
 
@@ -344,61 +351,61 @@ from datetime import datetime
 def calculate_fibonacci(n: int) -> int:
     """
     Calculate the nth Fibonacci number using dynamic programming.
-    
+
     Args:
         n (int): Position in Fibonacci sequence
-        
+
     Returns:
         int: The nth Fibonacci number
-        
+
     Raises:
         ValueError: If n is negative
     """
     if n < 0:
         raise ValueError("n must be non-negative")
-    
+
     if n <= 1:
         return n
-    
+
     a, b = 0, 1
     for _ in range(2, n + 1):
         a, b = b, a + b
-    
+
     return b
 
 
 def is_prime(num: int) -> bool:
     """
     Check if a number is prime.
-    
+
     Args:
         num (int): Number to check
-        
+
     Returns:
         bool: True if prime, False otherwise
     """
     if num < 2:
         return False
-    
+
     for i in range(2, int(math.sqrt(num)) + 1):
         if num % i == 0:
             return False
-    
+
     return True
 
 
 def generate_random_data(size: int = 10) -> List[Dict[str, Any]]:
     """
     Generate random data for testing purposes.
-    
+
     Args:
         size (int): Number of records to generate
-        
+
     Returns:
         List[Dict[str, Any]]: List of random data records
     """
     names = ["Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry"]
-    
+
     data = []
     for i in range(size):
         record = {
@@ -407,22 +414,24 @@ def generate_random_data(size: int = 10) -> List[Dict[str, Any]]:
             "age": random.randint(18, 65),
             "score": round(random.uniform(0, 100), 2),
             "timestamp": datetime.now().isoformat(),
-            "active": random.choice([True, False])
+            "active": random.choice([True, False]),
         }
         data.append(record)
-    
+
     return data
 
 
-def sort_data(data: List[Dict[str, Any]], key: str, reverse: bool = False) -> List[Dict[str, Any]]:
+def sort_data(
+    data: List[Dict[str, Any]], key: str, reverse: bool = False
+) -> List[Dict[str, Any]]:
     """
     Sort a list of dictionaries by a specified key.
-    
+
     Args:
         data (List[Dict[str, Any]]): Data to sort
         key (str): Key to sort by
         reverse (bool): Sort in descending order if True
-        
+
     Returns:
         List[Dict[str, Any]]: Sorted data
     """
@@ -431,27 +440,26 @@ def sort_data(data: List[Dict[str, Any]], key: str, reverse: bool = False) -> Li
 
 class DataProcessor:
     """A class for processing data with various operations."""
-    
+
     def __init__(self):
         self.data = []
-    
+
     def add_data(self, item: Dict[str, Any]) -> None:
         """Add a data item to the processor."""
         self.data.append(item)
-    
+
     def filter_by_age(self, min_age: int, max_age: int) -> List[Dict[str, Any]]:
         """Filter data by age range."""
-        return [item for item in self.data 
-                if min_age <= item.get('age', 0) <= max_age]
-    
+        return [item for item in self.data if min_age <= item.get("age", 0) <= max_age]
+
     def get_statistics(self) -> Dict[str, float]:
         """Calculate basic statistics for numerical fields."""
         if not self.data:
             return {}
-        
-        ages = [item.get('age', 0) for item in self.data]
-        scores = [item.get('score', 0) for item in self.data]
-        
+
+        ages = [item.get("age", 0) for item in self.data]
+        scores = [item.get("score", 0) for item in self.data]
+
         return {
             "total_records": len(self.data),
             "avg_age": sum(ages) / len(ages),
@@ -459,7 +467,7 @@ class DataProcessor:
             "min_age": min(ages),
             "max_age": max(ages),
             "min_score": min(scores),
-            "max_score": max(scores)
+            "max_score": max(scores),
         }
 
 
@@ -467,16 +475,16 @@ if __name__ == "__main__":
     # Example usage
     print("Fibonacci(10):", calculate_fibonacci(10))
     print("Is 17 prime?", is_prime(17))
-    
+
     # Generate and process some data
     processor = DataProcessor()
     sample_data = generate_random_data(5)
-    
+
     for item in sample_data:
         processor.add_data(item)
-    
+
     print("\nGenerated data:")
     for item in sample_data:
         print(f"  {item}")
-    
+
     print("\nStatistics:", processor.get_statistics())
