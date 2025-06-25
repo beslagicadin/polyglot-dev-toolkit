@@ -81,7 +81,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: ['14', '16', '18']
+        node-version: ['16', '18', '20']
     
     steps:
     - uses: actions/checkout@v3
@@ -103,7 +103,7 @@ jobs:
 
     - name: Upload JavaScript coverage to Codecov
       uses: codecov/codecov-action@v5
-      if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+      if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage/lcov.info
@@ -135,13 +135,17 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
     
+    - name: Create Java package directories
+      run: |
+        mkdir -p build/com/polyglot/utils
+    
     - name: Compile Java code
       run: |
-        javac -cp ".:src/java" src/java/*.java
+        javac -d build -cp ".:src/java" src/java/*.java
     
     - name: Run Java tests
       run: |
-        java -cp ".:src/java" com.polyglot.utils.Utils
+        java -cp "build:src/java" com.polyglot.utils.Utils
 
     - name: Scan Java dependencies
       if: matrix.os == 'ubuntu-latest'  # Restrict to known environment for security
@@ -154,6 +158,10 @@ jobs:
 
   security-scan:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
     
     steps:
     - uses: actions/checkout@v3
@@ -167,13 +175,14 @@ jobs:
         output: 'trivy-results.sarif'
     
     - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: 'trivy-results.sarif'
 
   code-quality:
     runs-on: ubuntu-latest
+    if: false  # Disable until SONAR_TOKEN is configured
     
     steps:
     - uses: actions/checkout@v3

@@ -36,7 +36,8 @@
   "homepage": "https://github.com/beslagicadin/polyglot-dev-toolkit#readme",
   "devDependencies": {
     "jest": "^29.7.0",
-    "eslint": "^8.57.0",
+    "eslint": "^9.0.0",
+    "@eslint/js": "^9.0.0",
     "jsdoc": "^4.0.2"
   },
   "jest": {
