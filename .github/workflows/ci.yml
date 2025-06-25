@@ -99,7 +99,7 @@ jobs:
       run: npm run lint
 
     - name: Run JavaScript tests with coverage
-      run: npx jest --coverage
+      run: npx jest --coverage --passWithNoTests
 
     - name: Upload JavaScript coverage to Codecov
       uses: codecov/codecov-action@v5
@@ -142,10 +142,17 @@ jobs:
     - name: Compile Java code
       run: |
         javac -d build -cp ".:src/java" src/java/*.java
+      shell: bash
     
-    - name: Run Java tests
+    - name: Run Java tests (Unix)
+      if: runner.os != 'Windows'
       run: |
         java -cp "build:src/java" com.polyglot.utils.Utils
+    
+    - name: Run Java tests (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        java -cp "build;src/java" com.polyglot.utils.Utils
 
     - name: Scan Java dependencies
       if: matrix.os == 'ubuntu-latest'  # Restrict to known environment for security

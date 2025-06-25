@@ -1,7 +1,6 @@
 {
   "name": "polyglot-dev-toolkit",
   "version": "1.0.0",
-  "type": "module",
   "description": "A comprehensive, production-ready toolkit showcasing modern development practices across Python, JavaScript, and Java ecosystems",
   "main": "src/javascript/utils.js",
   "scripts": {
@@ -36,15 +35,17 @@
   },
   "homepage": "https://github.com/beslagicadin/polyglot-dev-toolkit#readme",
   "devDependencies": {
-    "jest": "^29.7.0",
-    "eslint": "^9.0.0",
     "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^30.0.2",
     "jsdoc": "^4.0.2"
   },
   "jest": {
-    "testEnvironment": "node",
+    "testEnvironment": "jsdom",
     "testMatch": [
-      "**/tests/javascript/**/*.test.js"
+      "**/tests/javascript/**/*.test.js",
+      "**/tests/javascript/**/*.spec.js"
     ],
     "collectCoverageFrom": [
       "src/javascript/**/*.js"

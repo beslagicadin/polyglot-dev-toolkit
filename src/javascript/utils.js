@@ -739,9 +739,16 @@ async function mockApiCall(url, delay = 1000) {
   });
 }
 
-// Export functions for Node.js environment
+// Export all utilities for Node.js environment
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
+    DOMUtils,
+    APIClient,
+    DataUtils,
+    ValidationUtils,
+    StorageUtils,
+    DateUtils,
+    PerformanceUtils,
     calculateFibonacci,
     isPrime,
     generateRandomData,

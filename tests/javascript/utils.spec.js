@@ -1,4 +1,4 @@
-import { DOMUtils, APIClient, DataUtils, ValidationUtils, StorageUtils } from '../src/javascript/utils';
+const { DOMUtils, APIClient, DataUtils, ValidationUtils, StorageUtils } = require('../../src/javascript/utils');
 
 // Test suite for DOMUtils
 describe('DOMUtils', () => {
