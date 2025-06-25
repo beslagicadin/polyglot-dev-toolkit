@@ -7,14 +7,15 @@ Author: Adin Bešlagić
 Email: beslagicadin@gmail.com
 """
 
-import os
-import json
 import csv
 import hashlib
+import json
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 import requests
 
 
@@ -185,6 +186,7 @@ class SystemMonitor:
     def get_system_info(self) -> Dict[str, Any]:
         """Get basic system information."""
         import platform
+
         import psutil
 
         try:
@@ -344,8 +346,8 @@ This module contains various utility functions demonstrating Python best practic
 
 import math
 import random
-from typing import List, Dict, Any
 from datetime import datetime
+from typing import Any, Dict, List
 
 
 def calculate_fibonacci(n: int) -> int:
