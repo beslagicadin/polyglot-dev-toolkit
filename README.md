@@ -1,7 +1,7 @@
 # 🚀 Polyglot Dev Toolkit
 
 [![CI/CD Pipeline](https://github.com/beslagicadin/polyglot-dev-toolkit/workflows/Continuous%20Integration/badge.svg)](https://github.com/beslagicadin/polyglot-dev-toolkit/actions)
-[![Code Coverage](https://codecov.io/gh/beslagicadin/polyglot-dev-toolkit/branch/main/graph/badge.svg)](https://codecov.io/gh/beslagicadin/polyglot-dev-toolkit)
+[![Code Coverage](https://codecov.io/gh/beslagicadin/polyglot-dev-toolkit/branch/master/graph/badge.svg)](https://codecov.io/gh/beslagicadin/polyglot-dev-toolkit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-yellow)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
@@ -167,6 +167,6 @@ This project is designed to help earn various GitHub achievements:
 
 ## 📈 Project Stats
 
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/beslagicadin/new-project)
-![GitHub last commit](https://img.shields.io/github/last-commit/beslagicadin/new-project)
-![GitHub repo size](https://img.shields.io/github/repo-size/beslagicadin/new-project)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/beslagicadin/polyglot-dev-toolkit)
+![GitHub last commit](https://img.shields.io/github/last-commit/beslagicadin/polyglot-dev-toolkit)
+![GitHub repo size](https://img.shields.io/github/repo-size/beslagicadin/polyglot-dev-toolkit)
