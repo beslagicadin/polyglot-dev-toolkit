@@ -1,0 +1,61 @@
+{
+  "name": "github-profile-enhancement",
+  "version": "1.0.0",
+  "description": "A comprehensive project designed to showcase various programming skills and GitHub best practices",
+  "main": "src/javascript/utils.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/javascript/**/*.js",
+    "lint:fix": "eslint src/javascript/**/*.js --fix",
+    "start": "node src/javascript/utils.js",
+    "docs": "jsdoc src/javascript/*.js -d docs/javascript"
+  },
+  "keywords": [
+    "javascript",
+    "utilities",
+    "github",
+    "portfolio",
+    "testing",
+    "ci-cd"
+  ],
+  "author": {
+    "name": "Adin Bešlagić",
+    "email": "beslagicadin@gmail.com",
+    "url": "https://beslagicadin.vercel.app"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/beslagicadin/new-project.git"
+  },
+  "bugs": {
+    "url": "https://github.com/beslagicadin/new-project/issues"
+  },
+  "homepage": "https://github.com/beslagicadin/new-project#readme",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.57.0",
+    "jsdoc": "^4.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/javascript/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "src/javascript/**/*.js"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ]
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}
