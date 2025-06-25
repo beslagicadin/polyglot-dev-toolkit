@@ -240,7 +240,7 @@ jobs:
     if: |
       github.event_name == 'pull_request' &&
       github.actor == 'dependabot[bot]' &&
-      github.event.pull_request.head.ref contains 'dependabot/'
+      contains(github.event.pull_request.head.ref, 'dependabot/')
     
     steps:
     - name: Auto-merge Dependabot PRs
