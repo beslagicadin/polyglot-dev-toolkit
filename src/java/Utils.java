@@ -6,7 +6,7 @@
  * Email: beslagicadin@gmail.com
  */
 
-package java;
+package com.polyglot.utils;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
