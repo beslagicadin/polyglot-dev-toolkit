@@ -1,4 +1,4 @@
-package java;
+package com.polyglot.utils;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;

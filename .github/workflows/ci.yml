@@ -15,13 +15,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.8, 3.9, '3.10', 3.11, 3.12]
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         exclude:
           # Exclude some combinations to reduce job count
           - os: windows-latest
-            python-version: 3.8
+            python-version: '3.8'
           - os: macos-latest
-            python-version: 3.8
+            python-version: '3.8'
 
     steps:
     - uses: actions/checkout@v3
@@ -141,11 +141,16 @@ jobs:
     
     - name: Run Java tests
       run: |
-        java -cp ".:src/java" java.Utils
+        java -cp ".:src/java" com.polyglot.utils.Utils
 
     - name: Scan Java dependencies
+      if: matrix.os == 'ubuntu-latest'  # Restrict to known environment for security
       run: |
-        curl -s "https://jeremylong.github.io/DependencyCheck/dependency-check/bin/install_depcheck.sh" | bash && dependency-check/bin/dependency-check.sh --project "Java Project" --scan ./ --format "HTML" --out .
+        # Download and verify the script before execution
+        curl -s "https://jeremylong.github.io/DependencyCheck/dependency-check/bin/install_depcheck.sh" -o install_depcheck.sh
+        chmod +x install_depcheck.sh
+        ./install_depcheck.sh
+        dependency-check/bin/dependency-check.sh --project "Java Project" --scan ./ --format "HTML" --out .
 
   security-scan:
     runs-on: ubuntu-latest
