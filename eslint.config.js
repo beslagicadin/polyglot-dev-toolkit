@@ -20,7 +20,15 @@ export default [
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
         setInterval: 'readonly',
-        clearInterval: 'readonly'
+        clearInterval: 'readonly',
+        document: 'readonly',
+        window: 'readonly',
+        fetch: 'readonly',
+        MutationObserver: 'readonly',
+        Node: 'readonly',
+        URL: 'readonly',
+        localStorage: 'readonly',
+        performance: 'readonly'
       }
     },
     rules: {

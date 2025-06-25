@@ -182,18 +182,18 @@ class TestSystemMonitor(unittest.TestCase):
         """Set up test fixtures"""
         self.system_monitor = SystemMonitor()
     
-    @patch('utils.psutil')
-    @patch('utils.platform')
-    def test_get_system_info(self, mock_platform, mock_psutil):
+    @patch('builtins.__import__')
+    def test_get_system_info(self, mock_import):
         """Test system information retrieval"""
-        # Mock platform methods
+        # Create mock modules
+        mock_platform = MagicMock()
         mock_platform.system.return_value = 'Linux'
         mock_platform.release.return_value = '5.4.0'
         mock_platform.version.return_value = '#1 Ubuntu'
         mock_platform.machine.return_value = 'x86_64'
         mock_platform.processor.return_value = 'Intel'
         
-        # Mock psutil methods
+        mock_psutil = MagicMock()
         mock_psutil.cpu_count.return_value = 4
         
         mock_memory = MagicMock()
@@ -205,6 +205,17 @@ class TestSystemMonitor(unittest.TestCase):
         mock_disk.percent = 45.5
         mock_psutil.disk_usage.return_value = mock_disk
         
+        # Configure mock_import to return our mocks
+        def import_side_effect(name, *args, **kwargs):
+            if name == 'platform':
+                return mock_platform
+            elif name == 'psutil':
+                return mock_psutil
+            else:
+                return MagicMock()
+        
+        mock_import.side_effect = import_side_effect
+        
         # Test system info retrieval
         info = self.system_monitor.get_system_info()
         
@@ -214,14 +225,24 @@ class TestSystemMonitor(unittest.TestCase):
         self.assertEqual(info['memory_total'], 8589934592)
         self.assertIn('timestamp', info)
     
-    @patch('utils.psutil')
-    def test_check_disk_space(self, mock_psutil):
+    @patch('builtins.__import__')
+    def test_check_disk_space(self, mock_import):
         """Test disk space checking"""
+        mock_psutil = MagicMock()
         mock_usage = MagicMock()
         mock_usage.total = 1000000000  # 1GB
         mock_usage.used = 400000000    # 400MB
         mock_usage.free = 600000000    # 600MB
         mock_psutil.disk_usage.return_value = mock_usage
+        
+        # Configure mock_import
+        def import_side_effect(name, *args, **kwargs):
+            if name == 'psutil':
+                return mock_psutil
+            else:
+                return MagicMock()
+        
+        mock_import.side_effect = import_side_effect
         
         result = self.system_monitor.check_disk_space('/')
         

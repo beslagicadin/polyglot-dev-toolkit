@@ -439,10 +439,47 @@ def sort_data(
 
 
 class DataProcessor:
-    """A class for processing data with various operations."""
+    """Class for processing data with various operations"""
 
     def __init__(self):
         self.data = []
+
+    def csv_to_json(self, csv_file, json_file):
+        try:
+            with open(csv_file, mode='r') as f:
+                reader = csv.DictReader(f)
+                data = list(reader)
+
+            with open(json_file, mode='w') as f:
+                json.dump(data, f, indent=2)
+
+            return True
+        except Exception as e:
+            print(f'Error converting CSV to JSON: {e}')
+            return False
+
+    def json_to_csv(self, json_file, csv_file):
+        try:
+            with open(json_file, mode='r') as f:
+                data = json.load(f)
+
+            with open(csv_file, mode='w', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames=data[0].keys())
+                writer.writeheader()
+                writer.writerows(data)
+
+            return True
+        except Exception as e:
+            print(f'Error converting JSON to CSV: {e}')
+            return False
+
+    def validate_json(self, json_file):
+        try:
+            with open(json_file, mode='r') as f:
+                json.load(f)
+            return True
+        except json.JSONDecodeError:
+            return False
 
     def add_data(self, item: Dict[str, Any]) -> None:
         """Add a data item to the processor."""

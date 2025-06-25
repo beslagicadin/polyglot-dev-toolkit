@@ -1,6 +1,7 @@
 {
   "name": "polyglot-dev-toolkit",
   "version": "1.0.0",
+  "type": "module",
   "description": "A comprehensive, production-ready toolkit showcasing modern development practices across Python, JavaScript, and Java ecosystems",
   "main": "src/javascript/utils.js",
   "scripts": {
