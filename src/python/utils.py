@@ -96,8 +96,6 @@ class FileManager:
                 hash_sha256.update(chunk)
         return hash_sha256.hexdigest()
 
-
-
     def csv_to_json(self, csv_file: str, json_file: str) -> bool:
         """Convert CSV file to JSON format."""
         try:
@@ -220,11 +218,6 @@ class DataProcessor:
         except Exception as e:
             print(f"Error validating JSON file: {e}")
             return False
-
-
-
-
-
 
 
 class SystemMonitor:
@@ -353,7 +346,6 @@ class WebScraper:
                 "error": str(e),
                 "timestamp": datetime.now().isoformat(),
             }
-
 
 
 # Utility functions
