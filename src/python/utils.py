@@ -28,7 +28,7 @@ class FileManager:
 
     def _setup_logger(self) -> logging.Logger:
         """Setup logging configuration."""
-        logger = logging.getLogger(__name__)
+        logger = logging.getLogger(f"{__name__}.FileManager")
         logger.setLevel(logging.INFO)
 
         if not logger.handlers:
@@ -44,7 +44,7 @@ class FileManager:
     def organize_files_by_extension(self, directory: str) -> Dict[str, List[str]]:
         """Organize files in a directory by their extensions."""
         dir_path = Path(directory)
-        organized = {}
+        organized: Dict[str, List[str]] = {}
 
         if not dir_path.exists():
             self.logger.error(f"Directory {directory} does not exist")
@@ -65,8 +65,8 @@ class FileManager:
     def find_duplicates(self, directory: str) -> Dict[str, List[str]]:
         """Find duplicate files in a directory based on content hash."""
         dir_path = Path(directory)
-        hash_dict = {}
-        duplicates = {}
+        hash_dict: Dict[str, str] = {}
+        duplicates: Dict[str, List[str]] = {}
 
         if not dir_path.exists():
             self.logger.error(f"Directory {directory} does not exist")
@@ -97,33 +97,17 @@ class FileManager:
         return hash_sha256.hexdigest()
 
 
-class DataProcessor:
-    """Utility class for data processing operations."""
-
-    def __init__(self):
-        self.logger = self._setup_logger()
-
-    def _setup_logger(self) -> logging.Logger:
-        """Setup logging configuration."""
-        logger = logging.getLogger(f"{__name__}.DataProcessor")
-        logger.setLevel(logging.INFO)
-        return logger
 
     def csv_to_json(self, csv_file: str, json_file: str) -> bool:
         """Convert CSV file to JSON format."""
         try:
-            data = []
-            with open(csv_file, "r", encoding="utf-8") as csvf:
+            with open(csv_file, mode="r", encoding="utf-8") as csvf:
                 csv_reader = csv.DictReader(csvf)
-                for row in csv_reader:
-                    data.append(row)
-
-            with open(json_file, "w", encoding="utf-8") as jsonf:
+                data = list(csv_reader)
+            with open(json_file, mode="w", encoding="utf-8") as jsonf:
                 json.dump(data, jsonf, indent=2, ensure_ascii=False)
-
             self.logger.info(f"Successfully converted {csv_file} to {json_file}")
             return True
-
         except Exception as e:
             self.logger.error(f"Error converting CSV to JSON: {e}")
             return False
@@ -131,27 +115,19 @@ class DataProcessor:
     def json_to_csv(self, json_file: str, csv_file: str) -> bool:
         """Convert JSON file to CSV format."""
         try:
-            with open(json_file, "r", encoding="utf-8") as jsonf:
+            with open(json_file, mode="r", encoding="utf-8") as jsonf:
                 data = json.load(jsonf)
-
-            if not data:
-                self.logger.warning("No data found in JSON file")
-                return False
-
             if isinstance(data, list) and isinstance(data[0], dict):
                 fieldnames = data[0].keys()
-
-                with open(csv_file, "w", newline="", encoding="utf-8") as csvf:
+                with open(csv_file, mode="w", newline="", encoding="utf-8") as csvf:
                     writer = csv.DictWriter(csvf, fieldnames=fieldnames)
                     writer.writeheader()
                     writer.writerows(data)
-
                 self.logger.info(f"Successfully converted {json_file} to {csv_file}")
                 return True
             else:
                 self.logger.error("JSON data must be a list of dictionaries")
                 return False
-
         except Exception as e:
             self.logger.error(f"Error converting JSON to CSV: {e}")
             return False
@@ -159,7 +135,7 @@ class DataProcessor:
     def validate_json(self, json_file: str) -> bool:
         """Validate JSON file format."""
         try:
-            with open(json_file, "r", encoding="utf-8") as f:
+            with open(json_file, mode="r", encoding="utf-8") as f:
                 json.load(f)
             self.logger.info(f"JSON file {json_file} is valid")
             return True
@@ -169,6 +145,86 @@ class DataProcessor:
         except Exception as e:
             self.logger.error(f"Error validating JSON file: {e}")
             return False
+
+
+class DataProcessor:
+    """Class for processing data with various utilities."""
+
+    def __init__(self):
+        self.data: List[Dict[str, Any]] = []
+
+    def add_data(self, item: Dict[str, Any]) -> None:
+        """Add a data item to the processor."""
+        self.data.append(item)
+
+    def filter_by_age(self, min_age: int, max_age: int) -> List[Dict[str, Any]]:
+        """Filter data by age range."""
+        return [item for item in self.data if min_age <= item.get("age", 0) <= max_age]
+
+    def get_statistics(self) -> Dict[str, float]:
+        """Calculate basic statistics for numerical fields."""
+        if not self.data:
+            return {}
+        ages = [item.get("age", 0) for item in self.data]
+        scores = [item.get("score", 0) for item in self.data]
+        return {
+            "total_records": len(self.data),
+            "avg_age": sum(ages) / len(ages) if ages else 0,
+            "avg_score": sum(scores) / len(scores) if scores else 0,
+            "min_age": min(ages) if ages else 0,
+            "max_age": max(ages) if ages else 0,
+            "min_score": min(scores) if scores else 0,
+            "max_score": max(scores) if scores else 0,
+        }
+
+    def csv_to_json(self, csv_file: str, json_file: str) -> bool:
+        """Convert CSV file to JSON format."""
+        try:
+            with open(csv_file, mode="r", encoding="utf-8") as csvf:
+                reader = csv.DictReader(csvf)
+                data = list(reader)
+            with open(json_file, mode="w", encoding="utf-8") as jsonf:
+                json.dump(data, jsonf, indent=4)
+            return True
+        except Exception as e:
+            print(f"Error converting CSV to JSON: {e}")
+            return False
+
+    def json_to_csv(self, json_file: str, csv_file: str) -> bool:
+        """Convert JSON file to CSV format."""
+        try:
+            with open(json_file, mode="r", encoding="utf-8") as jsonf:
+                data = json.load(jsonf)
+            if isinstance(data, list) and len(data) > 0 and isinstance(data[0], dict):
+                fieldnames = data[0].keys()
+                with open(csv_file, mode="w", newline="", encoding="utf-8") as csvf:
+                    writer = csv.DictWriter(csvf, fieldnames=fieldnames)
+                    writer.writeheader()
+                    writer.writerows(data)
+                return True
+            else:
+                return False
+        except Exception as e:
+            print(f"Error converting JSON to CSV: {e}")
+            return False
+
+    def validate_json(self, json_file: str) -> bool:
+        """Validate JSON file format."""
+        try:
+            with open(json_file, mode="r", encoding="utf-8") as f:
+                json.load(f)
+            return True
+        except json.JSONDecodeError as e:
+            print(f"Invalid JSON in {json_file}: {e}")
+            return False
+        except Exception as e:
+            print(f"Error validating JSON file: {e}")
+            return False
+
+
+
+
+
 
 
 class SystemMonitor:
@@ -299,55 +355,11 @@ class WebScraper:
             }
 
 
-def main():
-    """Main function to demonstrate the utilities."""
-    print("Python Utilities Demo")
-    print("====================\n")
 
-    # File Manager Demo
-    print("1. File Manager Demo:")
-    fm = FileManager()
-    current_dir = os.getcwd()
-    organized = fm.organize_files_by_extension(current_dir)
-    print(f"Found {len(organized)} different file types in current directory")
-
-    # Data Processor Demo
-    print("\n2. Data Processor Demo:")
-    dp = DataProcessor()
-
-    # System Monitor Demo
-    print("\n3. System Monitor Demo:")
-    sm = SystemMonitor()
-    try:
-        system_info = sm.get_system_info()
-        if system_info:
-            print(f"Platform: {system_info.get('platform', 'Unknown')}")
-            print(f"CPU Count: {system_info.get('cpu_count', 'Unknown')}")
-    except ImportError:
-        print("psutil not installed - skipping system monitor demo")
-
-    # Web Scraper Demo
-    print("\n4. Web Scraper Demo:")
-    ws = WebScraper()
-    status = ws.check_url_status("https://httpbin.org/status/200")
-    print(f"Test URL status: {status.get('status_code', 'Error')}")
-
-    print("\nDemo completed!")
-
-
-if __name__ == "__main__":
-    main()
-
-"""
-Utility functions for the GitHub Profile Enhancement Project.
-
-This module contains various utility functions demonstrating Python best practices.
-"""
+# Utility functions
 
 import math
 import random
-from datetime import datetime
-from typing import Any, Dict, List
 
 
 def calculate_fibonacci(n: int) -> int:
@@ -440,90 +452,56 @@ def sort_data(
     return sorted(data, key=lambda x: x.get(key, 0), reverse=reverse)
 
 
-class DataProcessor:
-    """Class for processing data with various operations"""
+def main():
+    """Main function to demonstrate the utilities."""
+    print("Python Utilities Demo")
+    print("====================\n")
 
-    def __init__(self):
-        self.data = []
+    # File Manager Demo
+    print("1. File Manager Demo:")
+    fm = FileManager()
+    current_dir = os.getcwd()
+    organized = fm.organize_files_by_extension(current_dir)
+    print(f"Found {len(organized)} different file types in current directory")
 
-    def csv_to_json(self, csv_file, json_file):
-        try:
-            with open(csv_file, mode="r") as f:
-                reader = csv.DictReader(f)
-                data = list(reader)
-
-            with open(json_file, mode="w") as f:
-                json.dump(data, f, indent=2)
-
-            return True
-        except Exception as e:
-            print(f"Error converting CSV to JSON: {e}")
-            return False
-
-    def json_to_csv(self, json_file, csv_file):
-        try:
-            with open(json_file, mode="r") as f:
-                data = json.load(f)
-
-            with open(csv_file, mode="w", newline="") as f:
-                writer = csv.DictWriter(f, fieldnames=data[0].keys())
-                writer.writeheader()
-                writer.writerows(data)
-
-            return True
-        except Exception as e:
-            print(f"Error converting JSON to CSV: {e}")
-            return False
-
-    def validate_json(self, json_file):
-        try:
-            with open(json_file, mode="r") as f:
-                json.load(f)
-            return True
-        except json.JSONDecodeError:
-            return False
-
-    def add_data(self, item: Dict[str, Any]) -> None:
-        """Add a data item to the processor."""
-        self.data.append(item)
-
-    def filter_by_age(self, min_age: int, max_age: int) -> List[Dict[str, Any]]:
-        """Filter data by age range."""
-        return [item for item in self.data if min_age <= item.get("age", 0) <= max_age]
-
-    def get_statistics(self) -> Dict[str, float]:
-        """Calculate basic statistics for numerical fields."""
-        if not self.data:
-            return {}
-
-        ages = [item.get("age", 0) for item in self.data]
-        scores = [item.get("score", 0) for item in self.data]
-
-        return {
-            "total_records": len(self.data),
-            "avg_age": sum(ages) / len(ages),
-            "avg_score": sum(scores) / len(scores),
-            "min_age": min(ages),
-            "max_age": max(ages),
-            "min_score": min(scores),
-            "max_score": max(scores),
-        }
-
-
-if __name__ == "__main__":
-    # Example usage
-    print("Fibonacci(10):", calculate_fibonacci(10))
-    print("Is 17 prime?", is_prime(17))
-
-    # Generate and process some data
-    processor = DataProcessor()
+    # Data Processor Demo
+    print("\n2. Data Processor Demo:")
+    dp = DataProcessor()
     sample_data = generate_random_data(5)
 
     for item in sample_data:
-        processor.add_data(item)
+        dp.add_data(item)
 
     print("\nGenerated data:")
     for item in sample_data:
         print(f"  {item}")
 
-    print("\nStatistics:", processor.get_statistics())
+    print("\nStatistics:", dp.get_statistics())
+
+    # Utility functions demo
+    print("\n5. Utility Functions Demo:")
+    print("Fibonacci(10):", calculate_fibonacci(10))
+    print("Is 17 prime?", is_prime(17))
+
+    # System Monitor Demo
+    print("\n3. System Monitor Demo:")
+    sm = SystemMonitor()
+    try:
+        system_info = sm.get_system_info()
+        if system_info:
+            print(f"Platform: {system_info.get('platform', 'Unknown')}")
+            print(f"CPU Count: {system_info.get('cpu_count', 'Unknown')}")
+    except ImportError:
+        print("psutil not installed - skipping system monitor demo")
+
+    # Web Scraper Demo
+    print("\n4. Web Scraper Demo:")
+    ws = WebScraper()
+    status = ws.check_url_status("https://httpbin.org/status/200")
+    print(f"Test URL status: {status.get('status_code', 'Error')}")
+
+    print("\nDemo completed!")
+
+
+if __name__ == "__main__":
+    main()

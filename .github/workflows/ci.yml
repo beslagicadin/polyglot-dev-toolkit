@@ -61,8 +61,7 @@ jobs:
     
     - name: Type checking with mypy
       run: |
-        echo "MyPy checking temporarily disabled - will be re-enabled after code cleanup"
-        # mypy src/python --ignore-missing-imports
+        mypy src/python --ignore-missing-imports --check-untyped-defs
     
     - name: Test with pytest
       run: |
