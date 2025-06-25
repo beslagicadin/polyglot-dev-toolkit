@@ -1,75 +1,137 @@
-# GitHub Profile Enhancement Project
+# 🚀 Polyglot Dev Toolkit
 
-[![GitHub issues](https://img.shields.io/github/issues/beslagicadin/new-project)](https://github.com/beslagicadin/new-project/issues)
-[![GitHub forks](https://img.shields.io/github/forks/beslagicadin/new-project)](https://github.com/beslagicadin/new-project/network)
-[![GitHub stars](https://img.shields.io/github/stars/beslagicadin/new-project)](https://github.com/beslagicadin/new-project/stargazers)
-[![GitHub license](https://img.shields.io/github/license/beslagicadin/new-project)](https://github.com/beslagicadin/new-project/blob/master/LICENSE)
+[![CI/CD Pipeline](https://github.com/beslagicadin/polyglot-dev-toolkit/workflows/Continuous%20Integration/badge.svg)](https://github.com/beslagicadin/polyglot-dev-toolkit/actions)
+[![Code Coverage](https://codecov.io/gh/beslagicadin/polyglot-dev-toolkit/branch/main/graph/badge.svg)](https://codecov.io/gh/beslagicadin/polyglot-dev-toolkit)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-yellow)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Java](https://img.shields.io/badge/Java-11%2B-red)](https://openjdk.java.net/)
+[![Code Quality](https://api.codeclimate.com/v1/badges/placeholder/maintainability)](https://codeclimate.com/github/beslagicadin/polyglot-dev-toolkit/maintainability)
 
-A comprehensive project designed to showcase various programming skills and GitHub best practices.
+> **A comprehensive, production-ready toolkit showcasing modern development practices across Python, JavaScript, and Java ecosystems.**
 
-## 🚀 Features
+Polyglot Dev Toolkit is a curated collection of utilities, algorithms, and best practices that demonstrates professional software development across multiple programming languages. Perfect for developers looking to learn cross-language patterns, contribute to open source, or use battle-tested utilities in their projects.
 
-- **Multi-language Support**: Python, JavaScript, Java implementations
-- **Documentation**: Comprehensive docs with examples
-- **Testing**: Unit tests and integration tests
-- **CI/CD**: GitHub Actions workflows
-- **Code Quality**: Linting and formatting tools
-- **Security**: Dependency scanning and security best practices
+## ✨ What's Inside
 
-## 📁 Project Structure
+### 🐍 Python Ecosystem
+- **File Management**: Organize files, detect duplicates, hash calculations
+- **Data Processing**: CSV/JSON conversion, validation, transformation
+- **System Monitoring**: Resource usage, health checks, performance metrics
+- **Web Scraping**: HTTP clients, URL validation, content extraction
+- **Algorithms**: Fibonacci, prime checking, sorting, statistics
+
+### 🌐 JavaScript Ecosystem
+- **DOM Utilities**: Element creation, event handling, async operations
+- **API Client**: RESTful requests, response handling, error management
+- **Data Utils**: Deep cloning, debouncing, throttling, grouping
+- **Validation**: Email, URL, phone validation, form processing
+- **Performance**: Execution timing, profiling, optimization tools
+
+### ☕ Java Ecosystem
+- **Data Structures**: Generic collections, search algorithms
+- **Concurrency**: Async operations, CompletableFuture patterns
+- **Cryptography**: SHA-256 hashing, security utilities
+- **Statistics**: Mathematical operations, data analysis
+- **Streams**: Modern Java 8+ functional programming
+
+## 🏗️ Architecture
 
 ```
-new-project/
-├── src/
-│   ├── python/
-│   ├── javascript/
-│   └── java/
-├── tests/
-├── docs/
-├── .github/
-│   └── workflows/
-├── scripts/
-└── examples/
+polyglot-dev-toolkit/
+├── 📁 src/                    # Source code
+│   ├── 🐍 python/             # Python utilities
+│   │   └── utils.py           # Core Python modules
+│   ├── 🌐 javascript/         # JavaScript utilities  
+│   │   └── utils.js           # Modern JS/Node.js modules
+│   └── ☕ java/               # Java utilities
+│       └── Utils.java         # Object-oriented Java classes
+├── 🧪 tests/                  # Test suites
+│   ├── test_python_utils.py   # Python unit tests
+│   ├── test_javascript.spec.js # JavaScript tests
+│   └── TestJavaUtils.java     # Java test cases
+├── 📚 docs/                   # Documentation
+│   ├── README.md              # Detailed docs
+│   ├── API.md                 # API reference
+│   └── CONTRIBUTING.md        # Contribution guide
+├── 🔧 scripts/                # Automation scripts
+│   ├── performance_test.py    # Benchmarking tools
+│   ├── setup.sh              # Environment setup
+│   └── deploy.sh              # Deployment scripts
+├── 🎯 examples/               # Usage examples
+│   ├── python_examples.py     # Python demos
+│   ├── javascript_examples.js # JavaScript demos
+│   └── java_examples.java     # Java demos
+├── ⚙️ .github/                # GitHub automation
+│   └── workflows/             # CI/CD pipelines
+│       ├── ci.yml             # Continuous integration
+│       ├── release.yml        # Automated releases
+│       └── security.yml       # Security scanning
+└── 📦 config files            # Project configuration
+    ├── requirements.txt       # Python dependencies
+    ├── package.json          # Node.js configuration
+    ├── pom.xml               # Maven configuration
+    └── .gitignore            # Version control rules
 ```
 
-## 🛠️ Technologies Used
+## 🚀 Quick Start
 
-- **Languages**: Python, JavaScript, Java
-- **Testing**: pytest, Jest, JUnit
-- **CI/CD**: GitHub Actions
-- **Documentation**: Markdown, GitHub Pages
-- **Code Quality**: ESLint, Black, Prettier
+### Prerequisites
+- **Python 3.8+** for Python utilities
+- **Node.js 16+** for JavaScript utilities
+- **Java 11+** for Java utilities
+- **Git** for version control
 
-## 🏃‍♂️ Quick Start
+### Installation
 
-1. Clone the repository
 ```bash
-git clone https://github.com/beslagicadin/new-project.git
-cd new-project
-```
+# 1. Clone the repository
+git clone https://github.com/beslagicadin/polyglot-dev-toolkit.git
+cd polyglot-dev-toolkit
 
-2. Install dependencies
-```bash
-# Python
+# 2. Set up Python environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# JavaScript
+# 3. Set up JavaScript environment
 npm install
 
-# Java
-mvn install
+# 4. Verify Java installation
+javac -version
+java -version
 ```
 
-3. Run tests
+### Running Examples
+
 ```bash
-# Python
-pytest
+# Python examples
+python examples/python_examples.py
 
-# JavaScript
-npm test
+# JavaScript examples (Node.js)
+node examples/javascript_examples.js
 
-# Java
-mvn test
+# JavaScript examples (Browser)
+open examples/index.html
+
+# Java examples
+javac -cp src/java src/java/*.java
+java -cp src/java java.Utils
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+./scripts/run_tests.sh
+
+# Individual language tests
+pytest tests/ -v                    # Python
+npm test                            # JavaScript
+javac -cp src/java tests/*.java     # Java
+
+# Performance benchmarks
+python scripts/performance_test.py
 ```
 
 ## 📚 Documentation
