@@ -819,9 +819,12 @@ class TestMainFunctionExecution:
         import sys
         
         # Execute the module directly and verify it runs without errors
+        # Use current working directory instead of hardcoded path
+        import os
+        cwd = os.getcwd()
         result = subprocess.run(
             [sys.executable, "-m", "src.python.utils"],
-            cwd="/Users/adin/polyglot-dev-toolkit",
+            cwd=cwd,
             capture_output=True,
             text=True,
             timeout=30
@@ -889,9 +892,12 @@ class TestMainFunction:
         import sys
         
         # Run the module directly to test __name__ == '__main__' block
+        # Use current working directory instead of hardcoded path
+        import os
+        cwd = os.getcwd()
         result = subprocess.run(
             [sys.executable, "-m", "src.python.utils"],
-            cwd="/Users/adin/polyglot-dev-toolkit",
+            cwd=cwd,
             capture_output=True,
             text=True,
             timeout=10
