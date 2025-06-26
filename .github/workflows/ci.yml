@@ -176,18 +176,57 @@ jobs:
 
   code-quality:
     runs-on: ubuntu-latest
-    if: false  # Disable until SONAR_TOKEN is configured
+    needs: [test-python, test-javascript, test-java]
     
     steps:
     - uses: actions/checkout@v3
       with:
-        fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+        fetch-depth: 0  # Full history needed for Code Climate
     
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@master
+    - name: Set up Python for Code Climate
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Set up Node.js for Code Climate
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-ci.txt
+    
+    - name: Install JavaScript dependencies
+      run: npm ci
+    
+    - name: Run Python tests with coverage for Code Climate
+      run: |
+        pytest tests/ -v --cov=src/python --cov-report=xml
+    
+    - name: Run JavaScript tests with coverage for Code Climate
+      run: |
+        npx jest --coverage --passWithNoTests
+    
+    - name: Download Code Climate test reporter
+      run: |
+        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        chmod +x ./cc-test-reporter
+    
+    - name: Format coverage reports for Code Climate
+      run: |
+        # Format Python coverage
+        ./cc-test-reporter format-coverage -t coverage.py -o coverage/codeclimate.python.json coverage.xml
+        # Format JavaScript coverage
+        ./cc-test-reporter format-coverage -t lcov -o coverage/codeclimate.javascript.json coverage/lcov.info
+    
+    - name: Upload coverage to Code Climate
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      run: |
+        ./cc-test-reporter sum-coverage coverage/codeclimate.*.json -p 2 -o coverage/codeclimate.total.json
+        ./cc-test-reporter upload-coverage -i coverage/codeclimate.total.json
 
   deploy-docs:
     runs-on: ubuntu-latest
