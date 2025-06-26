@@ -16,9 +16,9 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 # Add src directory to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src', 'python'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from utils import (
+from src.python.utils import (
     FileManager, DataProcessor, SystemMonitor, WebScraper,
     calculate_fibonacci, is_prime, generate_random_data, sort_data
 )
@@ -260,7 +260,7 @@ class TestWebScraper(unittest.TestCase):
         """Set up test fixtures"""
         self.web_scraper = WebScraper(timeout=5)
     
-    @patch('utils.requests.Session')
+    @patch('src.python.utils.requests.Session')
     def test_fetch_url_success(self, mock_session_class):
         """Test successful URL fetching"""
         mock_session = MagicMock()
@@ -276,7 +276,7 @@ class TestWebScraper(unittest.TestCase):
         self.assertEqual(result, '<html>Test content</html>')
         mock_session.get.assert_called_once()
     
-    @patch('utils.requests.Session')
+    @patch('src.python.utils.requests.Session')
     def test_check_url_status_success(self, mock_session_class):
         """Test URL status checking"""
         mock_session = MagicMock()

@@ -8,9 +8,9 @@ import os
 import builtins
 
 # Add src directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'python'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from utils import calculate_fibonacci, is_prime, generate_random_data, sort_data, DataProcessor, FileManager, SystemMonitor, WebScraper
+from src.python.utils import calculate_fibonacci, is_prime, generate_random_data, sort_data, DataProcessor, FileManager, SystemMonitor, WebScraper
 
 
 class TestFibonacci:
@@ -509,7 +509,7 @@ class TestMainFunction:
         monkeypatch.setattr('builtins.input', lambda _: 'y')
         
         # Import and run main function
-        from utils import main
+        from src.python.utils import main
         main()
         
         # Capture output
@@ -794,7 +794,7 @@ class TestMainFunctionExecution:
         monkeypatch.setattr(builtins, '__import__', mock_import)
         
         try:
-            from utils import main
+            from src.python.utils import main
             
             # Capture output
             from io import StringIO
@@ -836,7 +836,7 @@ class TestMainFunction:
     
     def test_main_function_execution(self, capsys):
         """Test that main function executes without errors."""
-        from utils import main
+        from src.python.utils import main
         
         # Call main function
         main()
@@ -871,7 +871,7 @@ class TestMainFunction:
         try:
             # Reload the utils module to trigger the import error handling
             import importlib
-            import utils
+            import src.python.utils as utils
             importlib.reload(utils)
             
             # The module should still be importable despite psutil error
