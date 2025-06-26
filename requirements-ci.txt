@@ -1,0 +1,18 @@
+# Minimal requirements for CI testing
+# Core testing dependencies
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.0
+
+# Code quality and formatting
+black>=23.7.0
+flake8>=6.0.0
+isort>=5.12.0
+mypy>=1.5.0
+
+# Essential runtime dependencies
+requests>=2.31.0
+psutil>=5.9.0
+
+# Type hints
+types-requests
