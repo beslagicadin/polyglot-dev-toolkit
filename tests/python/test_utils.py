@@ -138,7 +138,9 @@ class TestFileManager:
         assert str(fm.base_path) == "."
         
         fm_custom = FileManager("/tmp")
-        assert str(fm_custom.base_path) == "/tmp"
+        # Use Path for cross-platform compatibility
+        from pathlib import Path
+        assert Path(str(fm_custom.base_path)) == Path("/tmp")
     
     def test_organize_files_by_extension(self, tmp_path):
         """Test organizing files by extension."""
