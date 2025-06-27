@@ -1,0 +1,9 @@
+[run]
+source = src/python
+relative_files = True
+
+[xml]
+output = coverage.xml
+
+[html]
+directory = htmlcov
