@@ -155,6 +155,7 @@ public class Utils {
         List<Person> data = new ArrayList<>();
         
         for (int i = 0; i < size; i++) {
+            // ThreadLocalRandom is safe for test data generation (not cryptographic purposes)
             String name = names[ThreadLocalRandom.current().nextInt(names.length)];
             int age = ThreadLocalRandom.current().nextInt(18, 66);
             double score = ThreadLocalRandom.current().nextDouble(0, 100);
@@ -362,11 +363,11 @@ public class Utils {
         } catch (InterruptedException e) {
             // Re-interrupt the thread as required by Sonar
             Thread.currentThread().interrupt();
-            // Log error in async operation - would use proper logger in production
-            e.printStackTrace();
+            // In production, would use proper logger instead of System.err
+            System.err.println("Async operation interrupted: " + e.getMessage());
         } catch (Exception e) {
-            // Log error in async operation - would use proper logger in production
-            e.printStackTrace();
+            // In production, would use proper logger instead of System.err
+            System.err.println("Error in async operation: " + e.getMessage());
         }
     }
 }
