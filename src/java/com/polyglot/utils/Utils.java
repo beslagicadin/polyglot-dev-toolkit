@@ -141,7 +141,7 @@ public class Utils {
             
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not available", e);
+            throw new UtilsException("SHA-256 algorithm not available", e);
         }
     }
     
@@ -206,7 +206,7 @@ public class Utils {
                 Thread.sleep(delayMs);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new RuntimeException("Operation interrupted", e);
+                throw new UtilsException("Operation interrupted", e);
             }
             
             return String.format("Processed: %s at %s", 
@@ -292,7 +292,7 @@ public class Utils {
     /**
      * Custom exception for demonstration
      */
-    public static class UtilsException extends Exception {
+    public static class UtilsException extends RuntimeException {
         public UtilsException(String message) {
             super(message);
         }
@@ -340,7 +340,7 @@ public class Utils {
         System.out.println("\n4. Statistics Demo:");
         List<Double> scores = people.stream()
                                    .map(Person::getScore)
-                                   .collect(Collectors.toList());
+                                   .toList();
         Statistics stats = calculateStatistics(scores);
         System.out.println("Score statistics: " + stats);
         
@@ -360,7 +360,8 @@ public class Utils {
         try {
             future.get();
         } catch (Exception e) {
-            System.err.println("Error in async operation: " + e.getMessage());
+            // Log error in async operation - would use proper logger in production
+            e.printStackTrace();
         }
     }
 }
