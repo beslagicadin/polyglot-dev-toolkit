@@ -291,7 +291,14 @@ public class Utils {
     }
     
     /**
-     * Custom exception for demonstration
+     * Custom unchecked exception for utility operations.
+     * 
+     * Note: This is an unchecked exception (extends RuntimeException) which means
+     * callers are not required to handle it in try-catch blocks. This design choice
+     * allows for cleaner code when calling utility methods that may fail due to
+     * system issues (like missing algorithms or interrupted operations).
+     * 
+     * @since 1.0.0
      */
     public static class UtilsException extends RuntimeException {
         public UtilsException(String message) {
@@ -339,6 +346,8 @@ public class Utils {
         
         // Test statistics
         System.out.println("\n4. Statistics Demo:");
+        // Note: Stream.toList() returns an immutable list (Java 16+)
+        // If you need a mutable list, use .collect(Collectors.toList()) instead
         List<Double> scores = people.stream()
                                    .map(Person::getScore)
                                    .toList();
