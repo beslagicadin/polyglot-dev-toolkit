@@ -359,6 +359,11 @@ public class Utils {
         // Wait for async operation to complete
         try {
             future.get();
+        } catch (InterruptedException e) {
+            // Re-interrupt the thread as required by Sonar
+            Thread.currentThread().interrupt();
+            // Log error in async operation - would use proper logger in production
+            e.printStackTrace();
         } catch (Exception e) {
             // Log error in async operation - would use proper logger in production
             e.printStackTrace();
