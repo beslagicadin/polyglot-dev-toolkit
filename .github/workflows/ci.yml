@@ -135,9 +135,9 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
     
-    - name: Run Maven tests
+    - name: Run Maven tests with Checkstyle
       run: |
-        mvn test
+        mvn checkstyle:check test
     
     - name: Generate coverage report
       run: |
@@ -181,17 +181,23 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        fetch-depth: 0  # Full history needed for Code Climate
+        fetch-depth: 0  # Full history needed for SonarQube
     
-    - name: Set up Python for Code Climate
+    - name: Set up Python for SonarQube
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
     
-    - name: Set up Node.js for Code Climate
+    - name: Set up Node.js for SonarQube
       uses: actions/setup-node@v3
       with:
         node-version: '20'
+    
+    - name: Set up JDK 17 for SonarQube
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
     
     - name: Install Python dependencies
       run: |
@@ -201,32 +207,32 @@ jobs:
     - name: Install JavaScript dependencies
       run: npm ci
     
-    - name: Run Python tests with coverage for Code Climate
+    - name: Run Python tests with coverage for SonarQube
       run: |
-        pytest tests/ -v --cov=src/python --cov-report=xml
+        pytest tests/ -v --cov=src/python --cov-report=xml --cov-report=html
     
-    - name: Run JavaScript tests with coverage for Code Climate
+    - name: Run JavaScript tests with coverage for SonarQube
       run: |
         npx jest --coverage --passWithNoTests
     
-    - name: Download Code Climate test reporter
+    - name: Run Maven tests with coverage for SonarQube
       run: |
-        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-        chmod +x ./cc-test-reporter
+        mvn test jacoco:report
     
-    - name: Format coverage reports for Code Climate
-      run: |
-        # Format Python coverage
-        ./cc-test-reporter format-coverage -t coverage.py -o coverage/codeclimate.python.json coverage.xml
-        # Format JavaScript coverage
-        ./cc-test-reporter format-coverage -t lcov -o coverage/codeclimate.javascript.json coverage/lcov.info
-    
-    - name: Upload coverage to Code Climate
+    - name: SonarQube Scan
+      uses: sonarqube-quality-gate-action@master
       env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-      run: |
-        ./cc-test-reporter sum-coverage coverage/codeclimate.*.json -p 2 -o coverage/codeclimate.total.json
-        ./cc-test-reporter upload-coverage -i coverage/codeclimate.total.json
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      with:
+        scanMetadataReportFile: target/sonar/report-task.txt
+    
+    - name: Run SonarQube Scanner
+      uses: sonarsource/sonarqube-scan-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
   deploy-docs:
     runs-on: ubuntu-latest

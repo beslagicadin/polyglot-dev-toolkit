@@ -1,0 +1,88 @@
+repos:
+  # General hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-xml
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Python hooks
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        language_version: python3
+        files: ^src/python/.*\.py$
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        files: ^src/python/.*\.py$
+        args: ["--profile", "black"]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        files: ^src/python/.*\.py$
+        args: [--max-line-length=88, --extend-ignore=E203,W503]
+
+  - repo: https://github.com/pycqa/pylint
+    rev: v3.0.3
+    hooks:
+      - id: pylint
+        files: ^src/python/.*\.py$
+        args: [--score=no]
+
+  # JavaScript/TypeScript hooks
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v8.56.0
+    hooks:
+      - id: eslint
+        files: ^src/javascript/.*\.(js|ts)$
+        types: [javascript]
+        additional_dependencies:
+          - eslint@8.56.0
+          - '@eslint/js@8.56.0'
+
+  # Java hooks
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.12.0
+    hooks:
+      - id: pretty-format-java
+        args: [--autofix]
+        files: ^src/java/.*\.java$
+
+  # Security hooks
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+
+  # Local hooks for custom quality checks
+  - repo: local
+    hooks:
+      - id: java-checkstyle
+        name: Java Checkstyle
+        entry: mvn checkstyle:check
+        language: system
+        files: ^src/java/.*\.java$
+        pass_filenames: false
+
+      - id: quality-check
+        name: Run Quality Check
+        entry: ./quality_check.sh
+        language: system
+        stages: [manual]
+        pass_filenames: false
