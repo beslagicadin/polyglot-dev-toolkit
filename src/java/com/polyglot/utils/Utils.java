@@ -149,7 +149,7 @@ public class Utils {
             
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not available", e);
+            throw new UtilsException("SHA-256 algorithm not available", e);
         }
     }
     
@@ -163,6 +163,7 @@ public class Utils {
         List<Person> data = new ArrayList<>();
         
         for (int i = 0; i < size; i++) {
+            // ThreadLocalRandom is safe for test data generation (not cryptographic purposes)
             String name = names[ThreadLocalRandom.current().nextInt(names.length)];
             int age = ThreadLocalRandom.current().nextInt(18, 66);
             double score = ThreadLocalRandom.current().nextDouble(0, 100);
@@ -214,7 +215,7 @@ public class Utils {
                 Thread.sleep(delayMs);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new RuntimeException("Operation interrupted", e);
+                throw new UtilsException("Operation interrupted", e);
             }
             
             return String.format("Processed: %s at %s", 
@@ -323,9 +324,16 @@ public class Utils {
     }
     
     /**
-     * Custom exception for demonstration
+     * Custom unchecked exception for utility operations.
+     * 
+     * Note: This is an unchecked exception (extends RuntimeException) which means
+     * callers are not required to handle it in try-catch blocks. This design choice
+     * allows for cleaner code when calling utility methods that may fail due to
+     * system issues (like missing algorithms or interrupted operations).
+     * 
+     * @since 1.0.0
      */
-    public static class UtilsException extends Exception {
+    public static class UtilsException extends RuntimeException {
         public UtilsException(String message) {
             super(message);
         }
@@ -371,9 +379,11 @@ public class Utils {
         
         // Test statistics
         LOGGER.info("\n4. Statistics Demo:");
+        // Note: Stream.toList() returns an immutable list (Java 16+)
+        // If you need a mutable list, use .collect(Collectors.toList()) instead
         List<Double> scores = people.stream()
                                    .map(Person::getScore)
-                                   .collect(Collectors.toList());
+                                   .toList();
         Statistics stats = calculateStatistics(scores);
         LOGGER.info("Score statistics: " + stats);
         
@@ -392,6 +402,10 @@ public class Utils {
         // Wait for async operation to complete
         try {
             future.get();
+        } catch (InterruptedException e) {
+            // Re-interrupt the thread as required by Sonar
+            Thread.currentThread().interrupt();
+            LOGGER.log(Level.SEVERE, "Async operation interrupted: " + e.getMessage(), e);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error in async operation: " + e.getMessage(), e);
         }

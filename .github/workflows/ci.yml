@@ -217,7 +217,11 @@ jobs:
     
     - name: Run Maven tests with coverage for SonarQube
       run: |
-        mvn test jacoco:report
+        mvn clean compile test jacoco:report
+    
+    - name: Copy Maven dependencies for SonarCloud
+      run: |
+        mvn dependency:copy-dependencies -DoutputDirectory=target/dependency
     
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@v2.3.0

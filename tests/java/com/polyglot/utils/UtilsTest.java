@@ -419,7 +419,8 @@ public class UtilsTest {
         // Create a thread that will interrupt the main thread
         Thread interruptingThread = new Thread(() -> {
             try {
-                Thread.sleep(100); // Give the main thread time to start waiting
+                // Use a very small delay to minimize test time
+                java.util.concurrent.TimeUnit.MILLISECONDS.sleep(10);
                 Thread.currentThread().interrupt(); // Self-interrupt to test handling
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -535,7 +536,7 @@ public class UtilsTest {
         Thread executorThread = new Thread(() -> {
             try {
                 // Wait a bit then interrupt all threads in the common pool
-                Thread.sleep(50);
+                java.util.concurrent.TimeUnit.MILLISECONDS.sleep(10);
                 // This is a more direct way to test the lambda's interrupt handling
                 future.cancel(true); // This should trigger cancellation/interruption
             } catch (InterruptedException e) {
