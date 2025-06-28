@@ -8,6 +8,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 /**
  * Comprehensive test suite for Java Utils class
@@ -15,6 +18,44 @@ import java.util.concurrent.ExecutionException;
  * @author Adin Bešlagić
  */
 public class UtilsTest {
+    
+    /**
+     * Custom log handler to capture log messages during tests
+     */
+    private static class TestLogHandler extends Handler {
+        private final List<LogRecord> logRecords = new ArrayList<>();
+        
+        @Override
+        public void publish(LogRecord record) {
+            logRecords.add(record);
+        }
+        
+        @Override
+        public void flush() {
+            // No-op
+        }
+        
+        @Override
+        public void close() throws SecurityException {
+            logRecords.clear();
+        }
+        
+        public List<LogRecord> getLogRecords() {
+            return new ArrayList<>(logRecords);
+        }
+        
+        public String getAllMessages() {
+            StringBuilder sb = new StringBuilder();
+            for (LogRecord record : logRecords) {
+                sb.append(record.getMessage()).append("\n");
+            }
+            return sb.toString();
+        }
+        
+        public void clear() {
+            logRecords.clear();
+        }
+    }
 
     @Test
     @DisplayName("Test Fibonacci calculation")
@@ -266,17 +307,17 @@ public class UtilsTest {
     @Test
     @DisplayName("Test main method execution")
     void testMainMethod() {
-        // Capture system output
-        java.io.ByteArrayOutputStream outContent = new java.io.ByteArrayOutputStream();
-        java.io.PrintStream originalOut = System.out;
+        // Capture logger output
+        Logger utilsLogger = Logger.getLogger(Utils.class.getName());
+        TestLogHandler testHandler = new TestLogHandler();
         
-        System.setOut(new java.io.PrintStream(outContent));
+        utilsLogger.addHandler(testHandler);
         
         try {
             // Run main method
             Utils.main(new String[]{});
             
-            String output = outContent.toString();
+            String output = testHandler.getAllMessages();
             
             // Verify expected output
             assertTrue(output.contains("Java Utilities Demo"));
@@ -289,8 +330,8 @@ public class UtilsTest {
             assertTrue(output.contains("Demo completed!"));
             
         } finally {
-            // Restore original System.out
-            System.setOut(originalOut);
+            // Remove test handler
+            utilsLogger.removeHandler(testHandler);
         }
     }
     
@@ -424,20 +465,17 @@ public class UtilsTest {
     @Test
     @DisplayName("Test main method with different execution paths")
     void testMainMethodEdgeCases() {
-        // Capture system output and error streams
-        java.io.ByteArrayOutputStream outContent = new java.io.ByteArrayOutputStream();
-        java.io.ByteArrayOutputStream errContent = new java.io.ByteArrayOutputStream();
-        java.io.PrintStream originalOut = System.out;
-        java.io.PrintStream originalErr = System.err;
+        // Capture logger output
+        Logger utilsLogger = Logger.getLogger(Utils.class.getName());
+        TestLogHandler testHandler = new TestLogHandler();
         
-        System.setOut(new java.io.PrintStream(outContent));
-        System.setErr(new java.io.PrintStream(errContent));
+        utilsLogger.addHandler(testHandler);
         
         try {
             // Test main method with null args
             Utils.main(null);
             
-            String output = outContent.toString();
+            String output = testHandler.getAllMessages();
             
             // Verify all demo sections are covered
             assertTrue(output.contains("Java Utilities Demo"));
@@ -447,21 +485,20 @@ public class UtilsTest {
             // If there's an exception, ensure it's handled gracefully
             assertNotNull(e);
         } finally {
-            // Restore original streams
-            System.setOut(originalOut);
-            System.setErr(originalErr);
+            // Remove test handler
+            utilsLogger.removeHandler(testHandler);
         }
         
         // Test main method with empty args array
-        System.setOut(new java.io.PrintStream(outContent));
-        outContent.reset();
+        testHandler.clear();
+        utilsLogger.addHandler(testHandler);
         
         try {
             Utils.main(new String[0]);
-            String output = outContent.toString();
+            String output = testHandler.getAllMessages();
             assertTrue(output.contains("Demo completed!"));
         } finally {
-            System.setOut(originalOut);
+            utilsLogger.removeHandler(testHandler);
         }
     }
     
@@ -527,21 +564,17 @@ public class UtilsTest {
     @Test
     @DisplayName("Test main method async operation exception handling")
     void testMainMethodAsyncExceptionHandling() {
-        // Capture system output and error streams
-        java.io.ByteArrayOutputStream outContent = new java.io.ByteArrayOutputStream();
-        java.io.ByteArrayOutputStream errContent = new java.io.ByteArrayOutputStream();
-        java.io.PrintStream originalOut = System.out;
-        java.io.PrintStream originalErr = System.err;
+        // Capture logger output
+        Logger utilsLogger = Logger.getLogger(Utils.class.getName());
+        TestLogHandler testHandler = new TestLogHandler();
         
-        System.setOut(new java.io.PrintStream(outContent));
-        System.setErr(new java.io.PrintStream(errContent));
+        utilsLogger.addHandler(testHandler);
         
         try {
             // Run main method - this should exercise the async operation and its exception handling
             Utils.main(new String[]{"test-arg"});
             
-            String output = outContent.toString();
-            String errorOutput = errContent.toString();
+            String output = testHandler.getAllMessages();
             
             // Verify the async operation section is present
             assertTrue(output.contains("Async Operation Demo"));
@@ -554,9 +587,8 @@ public class UtilsTest {
             // If there's an exception in main, it should be handled gracefully
             assertNotNull(e);
         } finally {
-            // Restore original streams
-            System.setOut(originalOut);
-            System.setErr(originalErr);
+            // Remove test handler
+            utilsLogger.removeHandler(testHandler);
         }
     }
     
