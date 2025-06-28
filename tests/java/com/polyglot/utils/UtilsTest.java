@@ -23,7 +23,7 @@ public class UtilsTest {
      * Custom log handler to capture log messages during tests
      */
     private static class TestLogHandler extends Handler {
-        private final List<LogRecord> logRecords = new ArrayList<>();
+        private final List<LogRecord> logRecords = Collections.synchronizedList(new ArrayList<>());
         
         @Override
         public void publish(LogRecord record) {
@@ -37,23 +37,31 @@ public class UtilsTest {
         
         @Override
         public void close() throws SecurityException {
-            logRecords.clear();
+            synchronized (logRecords) {
+                logRecords.clear();
+            }
         }
         
         public List<LogRecord> getLogRecords() {
-            return new ArrayList<>(logRecords);
+            synchronized (logRecords) {
+                return new ArrayList<>(logRecords);
+            }
         }
         
         public String getAllMessages() {
-            StringBuilder sb = new StringBuilder();
-            for (LogRecord record : logRecords) {
-                sb.append(record.getMessage()).append("\n");
+            synchronized (logRecords) {
+                StringBuilder sb = new StringBuilder();
+                for (LogRecord record : logRecords) {
+                    sb.append(record.getMessage()).append("\n");
+                }
+                return sb.toString();
             }
-            return sb.toString();
         }
         
         public void clear() {
-            logRecords.clear();
+            synchronized (logRecords) {
+                logRecords.clear();
+            }
         }
     }
 
