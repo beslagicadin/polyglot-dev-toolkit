@@ -8,7 +8,11 @@
 
 package com.polyglot.utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
@@ -236,10 +240,21 @@ public class Utils {
         }
         
         // Getters
-        public int getId() { return id; }
-        public String getName() { return name; }
-        public int getAge() { return age; }
-        public double getScore() { return score; }
+        public int getId() {
+            return id;
+        }
+        
+        public String getName() {
+            return name;
+        }
+        
+        public int getAge() {
+            return age;
+        }
+        
+        public double getScore() {
+            return score;
+        }
         
         @Override
         public String toString() {
@@ -280,11 +295,25 @@ public class Utils {
         }
         
         // Getters
-        public int getCount() { return count; }
-        public double getSum() { return sum; }
-        public double getAverage() { return average; }
-        public double getMin() { return min; }
-        public double getMax() { return max; }
+        public int getCount() {
+            return count;
+        }
+        
+        public double getSum() {
+            return sum;
+        }
+        
+        public double getAverage() {
+            return average;
+        }
+        
+        public double getMin() {
+            return min;
+        }
+        
+        public double getMax() {
+            return max;
+        }
         
         @Override
         public String toString() {
