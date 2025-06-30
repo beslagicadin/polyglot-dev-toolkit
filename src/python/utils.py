@@ -52,17 +52,13 @@ class FileManager:
             self.logger.error(f"Directory {directory} does not exist")
             return organized
 
-        # Use iterdir() for non-recursive (default for performance) or rglob() for recursive
-        iterator = dir_path.rglob("*") if recursive else dir_path.iterdir()
+        try:
+            # Use iterdir() for non-recursive (default for performance) or rglob() for recursive
+            iterator = dir_path.rglob("*") if recursive else dir_path.iterdir()
 
-        file_count = 0
-        for file_path in iterator:
-            if file_path.is_file():
-                # Skip hidden files and common build/cache directories for performance
-                if file_path.name.startswith(".") or any(
-                    part in str(file_path)
-                    for part in ["node_modules", ".git", "target", "__pycache__"]
-                ):
+            file_count = 0
+            for file_path in iterator:
+                if self._should_skip_file(file_path):
                     continue
 
                 extension = file_path.suffix.lower() or "no_extension"
@@ -75,10 +71,25 @@ class FileManager:
                 if file_count >= 100:
                     break
 
-        self.logger.info(
-            f"Organized {sum(len(files) for files in organized.values())} files"
-        )
+            self.logger.info(
+                f"Organized {sum(len(files) for files in organized.values())} files"
+            )
+        except OSError as e:
+            self.logger.error(f"Error organizing files: {e}")
+        
         return organized
+    
+    def _should_skip_file(self, file_path: Path) -> bool:
+        """Check if file should be skipped during processing."""
+        if not file_path.is_file():
+            return True
+        
+        # Skip hidden files and common build/cache directories for performance
+        skip_patterns = ["node_modules", ".git", "target", "__pycache__"]
+        return (
+            file_path.name.startswith(".")
+            or any(part in str(file_path) for part in skip_patterns)
+        )
 
     def find_duplicates(self, directory: str) -> Dict[str, List[str]]:
         """Find duplicate files in a directory based on content hash."""
@@ -193,49 +204,6 @@ class DataProcessor:
             "max_score": max(scores) if scores else 0,
         }
 
-    def csv_to_json(self, csv_file: str, json_file: str) -> bool:
-        """Convert CSV file to JSON format."""
-        try:
-            with open(csv_file, mode="r", encoding="utf-8") as csvf:
-                reader = csv.DictReader(csvf)
-                data = list(reader)
-            with open(json_file, mode="w", encoding="utf-8") as jsonf:
-                json.dump(data, jsonf, indent=4)
-            return True
-        except Exception as e:
-            print(f"Error converting CSV to JSON: {e}")
-            return False
-
-    def json_to_csv(self, json_file: str, csv_file: str) -> bool:
-        """Convert JSON file to CSV format."""
-        try:
-            with open(json_file, mode="r", encoding="utf-8") as jsonf:
-                data = json.load(jsonf)
-            if isinstance(data, list) and len(data) > 0 and isinstance(data[0], dict):
-                fieldnames = data[0].keys()
-                with open(csv_file, mode="w", newline="", encoding="utf-8") as csvf:
-                    writer = csv.DictWriter(csvf, fieldnames=fieldnames)
-                    writer.writeheader()
-                    writer.writerows(data)
-                return True
-            else:
-                return False
-        except Exception as e:
-            print(f"Error converting JSON to CSV: {e}")
-            return False
-
-    def validate_json(self, json_file: str) -> bool:
-        """Validate JSON file format."""
-        try:
-            with open(json_file, mode="r", encoding="utf-8") as f:
-                json.load(f)
-            return True
-        except json.JSONDecodeError as e:
-            print(f"Invalid JSON in {json_file}: {e}")
-            return False
-        except Exception as e:
-            print(f"Error validating JSON file: {e}")
-            return False
 
 
 class SystemMonitor:

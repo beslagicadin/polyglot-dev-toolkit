@@ -516,7 +516,13 @@ if (typeof module !== 'undefined' && module.exports) {
     ValidationUtils,
     StorageUtils,
     DateUtils,
-    PerformanceUtils
+    PerformanceUtils,
+    calculateFibonacci,
+    isPrime,
+    generateRandomData,
+    sortData,
+    DataProcessor,
+    mockApiCall
   };
 }
 
@@ -739,24 +745,6 @@ async function mockApiCall(url, delay = 1000) {
   });
 }
 
-// Export all utilities for Node.js environment
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    DOMUtils,
-    APIClient,
-    DataUtils,
-    ValidationUtils,
-    StorageUtils,
-    DateUtils,
-    PerformanceUtils,
-    calculateFibonacci,
-    isPrime,
-    generateRandomData,
-    sortData,
-    DataProcessor,
-    mockApiCall
-  };
-}
 
 // Example usage if running directly
 if (typeof window === 'undefined' && require.main === module) {

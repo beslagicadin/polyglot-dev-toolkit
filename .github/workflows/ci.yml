@@ -220,9 +220,9 @@ jobs:
         mvn clean compile test jacoco:report
     
     - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@v2.3.0
+      uses: SonarSource/sonarcloud-github-action@v3.1.0
       env:
-        PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   deploy-docs:
@@ -250,7 +250,7 @@ jobs:
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
-        github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./docs/_build/html
 
   performance-test:
@@ -285,5 +285,5 @@ jobs:
     - name: Auto-merge Dependabot PRs
       uses: pascalgn/merge-action@v0.15.6
       with:
-        github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         merge_method: squash

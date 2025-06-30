@@ -168,11 +168,11 @@ ${sonarIssue.message}
 
 // CLI usage
 async function main() {
-  const githubToken = process.env.PERSONAL_ACCESS_TOKEN;
+  const githubToken = process.env.GITHUB_TOKEN;
   const sonarToken = process.env.SONAR_TOKEN;
 
   if (!githubToken) {
-    console.error('❌ PERSONAL_ACCESS_TOKEN environment variable is required');
+    console.error('❌ GITHUB_TOKEN environment variable is required');
     process.exit(1);
   }
 
