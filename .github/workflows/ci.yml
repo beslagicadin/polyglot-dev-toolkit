@@ -226,12 +226,12 @@ jobs:
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@v2.3.0
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   deploy-docs:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     needs: [test-python, test-javascript, test-java]
     
     steps:
@@ -254,7 +254,7 @@ jobs:
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         publish_dir: ./docs/_build/html
 
   performance-test:
@@ -289,5 +289,5 @@ jobs:
     - name: Auto-merge Dependabot PRs
       uses: pascalgn/merge-action@v0.15.6
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         merge_method: squash
