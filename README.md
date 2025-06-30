@@ -6,7 +6,7 @@
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-yellow)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Java](https://img.shields.io/badge/Java-11%2B-red)](https://openjdk.java.net/)
-[![Code Quality](https://api.codeclimate.com/v1/badges/placeholder/maintainability)](https://codeclimate.com/github/beslagicadin/polyglot-dev-toolkit/maintainability)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=beslagicadin_polyglot-dev-toolkit&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=beslagicadin_polyglot-dev-toolkit)
 
 > **A comprehensive, production-ready toolkit showcasing modern development practices across Python, JavaScript, and Java ecosystems.**
 
