@@ -326,107 +326,9 @@ class TestDataProcessor:
         assert stats["min_age"] == 25
         assert stats["max_age"] == 35
 
-    def test_csv_to_json_success(self, tmp_path):
-        """Test successful CSV to JSON conversion."""
-        processor = DataProcessor()
-
-        # Create a test CSV file
-        csv_file = tmp_path / "test.csv"
-        csv_file.write_text("name,age\nAlice,25\nBob,30")
-
-        json_file = tmp_path / "test.json"
-
-        result = processor.csv_to_json(str(csv_file), str(json_file))
-        assert result == True
-        assert json_file.exists()
-
-    def test_csv_to_json_failure(self):
-        """Test CSV to JSON conversion with non-existent file."""
-        processor = DataProcessor()
-        result = processor.csv_to_json("nonexistent.csv", "output.json")
-        assert result == False
-
-    def test_json_to_csv_success(self, tmp_path):
-        """Test successful JSON to CSV conversion."""
-        processor = DataProcessor()
-
-        # Create a test JSON file
-        json_file = tmp_path / "test.json"
-        json_file.write_text(
-            '[{"name": "Alice", "age": 25}, {"name": "Bob", "age": 30}]'
-        )
-
-        csv_file = tmp_path / "test.csv"
-
-        result = processor.json_to_csv(str(json_file), str(csv_file))
-        assert result == True
-        assert csv_file.exists()
-
-    def test_json_to_csv_invalid_format(self, tmp_path):
-        """Test JSON to CSV conversion with invalid JSON format."""
-        processor = DataProcessor()
-
-        # Create invalid JSON file (not a list of dicts)
-        json_file = tmp_path / "invalid.json"
-        json_file.write_text('{"key": "value"}')
-
-        csv_file = tmp_path / "output.csv"
-
-        result = processor.json_to_csv(str(json_file), str(csv_file))
-        assert result == False
-
-    def test_validate_json_valid(self, tmp_path):
-        """Test JSON validation with valid file."""
-        processor = DataProcessor()
-
-        json_file = tmp_path / "valid.json"
-        json_file.write_text('{"name": "Alice", "age": 25}')
-
-        result = processor.validate_json(str(json_file))
-        assert result == True
-
-    def test_validate_json_invalid(self, tmp_path):
-        """Test JSON validation with invalid file."""
-        processor = DataProcessor()
-
-        json_file = tmp_path / "invalid.json"
-        json_file.write_text('{"name": "Alice", "age": 25')
-
-        result = processor.validate_json(str(json_file))
-        assert result == False
-
-    def test_validate_json_nonexistent(self):
-        """Test JSON validation with non-existent file."""
-        processor = DataProcessor()
-        result = processor.validate_json("nonexistent.json")
-        assert result == False
-
-    def test_json_to_csv_general_exception(self, tmp_path, monkeypatch):
-        """Test JSON to CSV conversion when a general exception occurs."""
-        processor = DataProcessor()
-
-        # Create a valid JSON file
-        json_file = tmp_path / "test.json"
-        json_file.write_text('[{"name": "Alice", "age": 25}]')
-
-        csv_file = tmp_path / "output.csv"
-
-        # Mock open to raise a general exception
-        import builtins
-
-        original_open = builtins.open
-
-        def mock_open(*args, **kwargs):
-            filename = args[0] if args else kwargs.get("file", "")
-            mode = args[1] if len(args) > 1 else kwargs.get("mode", "")
-            if str(csv_file) in str(filename) and "w" in str(mode):
-                raise Exception("Simulated file write error")
-            return original_open(*args, **kwargs)
-
-        monkeypatch.setattr(builtins, "open", mock_open)
-
-        result = processor.json_to_csv(str(json_file), str(csv_file))
-        assert result == False
+    # Note: File operation methods (csv_to_json, json_to_csv, validate_json) 
+    # have been moved to FileManager class to avoid code duplication.
+    # These tests are now in the TestFileManager class above.
 
 
 class TestSystemMonitor:
@@ -782,17 +684,19 @@ class TestFileManagerEdgeCases:
 class TestDataProcessorEdgeCases:
     """Test DataProcessor edge cases."""
 
-    def test_json_to_csv_empty_data(self, tmp_path):
-        """Test JSON to CSV conversion with empty data."""
+    def test_filter_by_age_edge_cases(self):
+        """Test filter_by_age with edge cases."""
         processor = DataProcessor()
-
-        json_file = tmp_path / "empty.json"
-        json_file.write_text("[]")
-
-        csv_file = tmp_path / "output.csv"
-
-        result = processor.json_to_csv(str(json_file), str(csv_file))
-        assert result == False
+        
+        # Add data with missing age fields
+        processor.add_data({"name": "Alice"})  # No age field
+        processor.add_data({"name": "Bob", "age": 25})
+        processor.add_data({"name": "Charlie", "age": None})  # None age
+        
+        # Should handle missing/None age gracefully
+        filtered = processor.filter_by_age(20, 30)
+        assert len(filtered) == 1
+        assert filtered[0]["name"] == "Bob"
 
 
 class TestMainFunctionExecution:
