@@ -76,19 +76,18 @@ class FileManager:
             )
         except OSError as e:
             self.logger.error(f"Error organizing files: {e}")
-        
+
         return organized
-    
+
     def _should_skip_file(self, file_path: Path) -> bool:
         """Check if file should be skipped during processing."""
         if not file_path.is_file():
             return True
-        
+
         # Skip hidden files and common build/cache directories for performance
         skip_patterns = ["node_modules", ".git", "target", "__pycache__"]
-        return (
-            file_path.name.startswith(".")
-            or any(part in str(file_path) for part in skip_patterns)
+        return file_path.name.startswith(".") or any(
+            part in str(file_path) for part in skip_patterns
         )
 
     def find_duplicates(self, directory: str) -> Dict[str, List[str]]:
@@ -203,7 +202,6 @@ class DataProcessor:
             "min_score": min(scores) if scores else 0,
             "max_score": max(scores) if scores else 0,
         }
-
 
 
 class SystemMonitor:
