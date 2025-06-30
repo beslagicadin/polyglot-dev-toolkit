@@ -8,7 +8,11 @@
 
 package com.polyglot.utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
@@ -17,11 +21,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Utility class for common data operations
  */
 public class Utils {
+    
+    private static final Logger LOGGER = Logger.getLogger(Utils.class.getName());
     
     /**
      * Calculate the nth Fibonacci number using dynamic programming
@@ -233,10 +241,21 @@ public class Utils {
         }
         
         // Getters
-        public int getId() { return id; }
-        public String getName() { return name; }
-        public int getAge() { return age; }
-        public double getScore() { return score; }
+        public int getId() {
+            return id;
+        }
+        
+        public String getName() {
+            return name;
+        }
+        
+        public int getAge() {
+            return age;
+        }
+        
+        public double getScore() {
+            return score;
+        }
         
         @Override
         public String toString() {
@@ -277,11 +296,25 @@ public class Utils {
         }
         
         // Getters
-        public int getCount() { return count; }
-        public double getSum() { return sum; }
-        public double getAverage() { return average; }
-        public double getMin() { return min; }
-        public double getMax() { return max; }
+        public int getCount() {
+            return count;
+        }
+        
+        public double getSum() {
+            return sum;
+        }
+        
+        public double getAverage() {
+            return average;
+        }
+        
+        public double getMin() {
+            return min;
+        }
+        
+        public double getMax() {
+            return max;
+        }
         
         @Override
         public String toString() {
@@ -314,23 +347,23 @@ public class Utils {
      * Main method for testing utilities
      */
     public static void main(String[] args) {
-        System.out.println("Java Utilities Demo");
-        System.out.println("===================\n");
+        LOGGER.info("Java Utilities Demo");
+        LOGGER.info("===================\n");
         
         // Test Fibonacci
-        System.out.println("1. Fibonacci Demo:");
-        System.out.println("Fibonacci(10): " + fibonacci(10));
+        LOGGER.info("1. Fibonacci Demo:");
+        LOGGER.info("Fibonacci(10): " + fibonacci(10));
         
         // Test prime checking
-        System.out.println("\n2. Prime Number Demo:");
-        System.out.println("Is 17 prime? " + isPrime(17));
-        System.out.println("Primes up to 20: " + sieveOfEratosthenes(20));
+        LOGGER.info("\n2. Prime Number Demo:");
+        LOGGER.info("Is 17 prime? " + isPrime(17));
+        LOGGER.info("Primes up to 20: " + sieveOfEratosthenes(20));
         
         // Test data generation and processing
-        System.out.println("\n3. Data Processing Demo:");
+        LOGGER.info("\n3. Data Processing Demo:");
         List<Person> people = generateRandomData(5);
-        System.out.println("Generated people:");
-        people.forEach(System.out::println);
+        LOGGER.info("Generated people:");
+        people.forEach(person -> LOGGER.info(person.toString()));
         
         // Group by age range
         Map<String, List<Person>> grouped = groupBy(people, person -> {
@@ -340,31 +373,31 @@ public class Utils {
             else return "Senior";
         });
         
-        System.out.println("\nGrouped by age:");
+        LOGGER.info("\nGrouped by age:");
         grouped.forEach((key, value) -> 
-            System.out.println(key + ": " + value.size() + " people"));
+            LOGGER.info(key + ": " + value.size() + " people"));
         
         // Test statistics
-        System.out.println("\n4. Statistics Demo:");
+        LOGGER.info("\n4. Statistics Demo:");
         // Note: Stream.toList() returns an immutable list (Java 16+)
         // If you need a mutable list, use .collect(Collectors.toList()) instead
         List<Double> scores = people.stream()
                                    .map(Person::getScore)
                                    .toList();
         Statistics stats = calculateStatistics(scores);
-        System.out.println("Score statistics: " + stats);
+        LOGGER.info("Score statistics: " + stats);
         
         // Test SHA-256
-        System.out.println("\n5. Hashing Demo:");
+        LOGGER.info("\n5. Hashing Demo:");
         String input = "Hello, GitHub!";
-        System.out.println("SHA-256 of '" + input + "': " + calculateSHA256(input));
+        LOGGER.info("SHA-256 of '" + input + "': " + calculateSHA256(input));
         
         // Test async operation
-        System.out.println("\n6. Async Operation Demo:");
+        LOGGER.info("\n6. Async Operation Demo:");
         CompletableFuture<String> future = processAsync("GitHub Stats Enhancement", 1000);
-        future.thenAccept(result -> System.out.println("Async result: " + result));
+        future.thenAccept(result -> LOGGER.info("Async result: " + result));
         
-        System.out.println("\nDemo completed!");
+        LOGGER.info("\nDemo completed!");
         
         // Wait for async operation to complete
         try {
@@ -372,11 +405,9 @@ public class Utils {
         } catch (InterruptedException e) {
             // Re-interrupt the thread as required by Sonar
             Thread.currentThread().interrupt();
-            // In production, would use proper logger instead of System.err
-            System.err.println("Async operation interrupted: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Async operation interrupted: " + e.getMessage(), e);
         } catch (Exception e) {
-            // In production, would use proper logger instead of System.err
-            System.err.println("Error in async operation: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error in async operation: " + e.getMessage(), e);
         }
     }
 }
