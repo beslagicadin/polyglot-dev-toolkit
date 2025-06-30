@@ -96,7 +96,7 @@ class TestDataProcessor(unittest.TestCase):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
     
     def test_csv_to_json_conversion(self):
-        """Test CSV to JSON conversion"""
+        """Test CSV to JSON conversion using FileManager"""
         # Create test CSV
         csv_file = Path(self.temp_dir) / 'test.csv'
         json_file = Path(self.temp_dir) / 'test.json'
@@ -111,8 +111,9 @@ class TestDataProcessor(unittest.TestCase):
             writer = csv.writer(f)
             writer.writerows(csv_data)
         
-        # Test conversion
-        success = self.data_processor.csv_to_json(str(csv_file), str(json_file))
+        # Test conversion using FileManager (methods moved from DataProcessor)
+        file_manager = FileManager()
+        success = file_manager.csv_to_json(str(csv_file), str(json_file))
         
         self.assertTrue(success)
         self.assertTrue(json_file.exists())
@@ -126,7 +127,7 @@ class TestDataProcessor(unittest.TestCase):
         self.assertEqual(data[0]['age'], '25')
     
     def test_json_to_csv_conversion(self):
-        """Test JSON to CSV conversion"""
+        """Test JSON to CSV conversion using FileManager"""
         # Create test JSON
         json_file = Path(self.temp_dir) / 'test.json'
         csv_file = Path(self.temp_dir) / 'test.csv'
@@ -139,8 +140,9 @@ class TestDataProcessor(unittest.TestCase):
         with open(json_file, 'w') as f:
             json.dump(json_data, f)
         
-        # Test conversion
-        success = self.data_processor.json_to_csv(str(json_file), str(csv_file))
+        # Test conversion using FileManager (methods moved from DataProcessor)
+        file_manager = FileManager()
+        success = file_manager.json_to_csv(str(json_file), str(csv_file))
         
         self.assertTrue(success)
         self.assertTrue(csv_file.exists())
@@ -154,24 +156,28 @@ class TestDataProcessor(unittest.TestCase):
         self.assertEqual(rows[0]['name'], 'Alice')
     
     def test_validate_json_valid(self):
-        """Test JSON validation with valid file"""
+        """Test JSON validation with valid file using FileManager"""
         json_file = Path(self.temp_dir) / 'valid.json'
         json_data = {'key': 'value', 'number': 42}
         
         with open(json_file, 'w') as f:
             json.dump(json_data, f)
         
-        is_valid = self.data_processor.validate_json(str(json_file))
+        # Test validation using FileManager (method moved from DataProcessor)
+        file_manager = FileManager()
+        is_valid = file_manager.validate_json(str(json_file))
         self.assertTrue(is_valid)
     
     def test_validate_json_invalid(self):
-        """Test JSON validation with invalid file"""
+        """Test JSON validation with invalid file using FileManager"""
         json_file = Path(self.temp_dir) / 'invalid.json'
         
         with open(json_file, 'w') as f:
             f.write('{"invalid": json content}')
         
-        is_valid = self.data_processor.validate_json(str(json_file))
+        # Test validation using FileManager (method moved from DataProcessor)
+        file_manager = FileManager()
+        is_valid = file_manager.validate_json(str(json_file))
         self.assertFalse(is_valid)
 
 

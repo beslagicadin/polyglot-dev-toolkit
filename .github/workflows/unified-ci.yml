@@ -1,0 +1,255 @@
+name: Unified CI Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  schedule:
+    - cron: '0 2 * * 1' # Weekly on Monday at 2 AM UTC
+
+env:
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  test-javascript:
+    name: JavaScript Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Shallow clones should be disabled for better analysis
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run JavaScript tests with coverage
+      run: npm test -- --coverage --coverageReporters=text-lcov --coverageReporters=json
+    
+    - name: Upload JavaScript coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: javascript
+        name: javascript-coverage
+    
+    - name: Archive JavaScript coverage results
+      uses: actions/upload-artifact@v3
+      with:
+        name: javascript-coverage
+        path: coverage/
+
+  test-python:
+    name: Python Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        exclude:
+          # Exclude some combinations to reduce CI time while maintaining good coverage
+          - os: windows-latest
+            python-version: '3.8'
+          - os: macos-latest
+            python-version: '3.8'
+          - os: macos-latest
+            python-version: '3.11'
+          - os: macos-latest
+            python-version: '3.12'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov
+    
+    - name: Run Python tests with coverage
+      run: |
+        pytest tests/ --cov=src/python --cov-report=xml --cov-report=term-missing
+    
+    - name: Upload Python coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: python
+        name: python-coverage-${{ matrix.os }}-${{ matrix.python-version }}
+    
+    - name: Archive Python coverage results
+      uses: actions/upload-artifact@v3
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9'
+      with:
+        name: python-coverage
+        path: coverage.xml
+
+  test-java:
+    name: Java Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+    
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    
+    - name: Run Java tests with coverage
+      run: |
+        if [ -f "pom.xml" ]; then
+          mvn clean test jacoco:report
+        elif [ -f "build.gradle" ]; then
+          ./gradlew test jacocoTestReport
+        else
+          echo "No Java build file found, skipping Java tests"
+        fi
+    
+    - name: Upload Java coverage to Codecov
+      uses: codecov/codecov-action@v3
+      if: success()
+      with:
+        file: ./target/site/jacoco/jacoco.xml
+        flags: java
+        name: java-coverage
+
+  sonarcloud:
+    name: SonarCloud Analysis
+    runs-on: ubuntu-latest
+    needs: [test-javascript, test-python, test-java]
+    if: github.event_name != 'schedule' # Skip SonarCloud on scheduled runs
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Shallow clones should be disabled for SonarCloud analysis
+    
+    - name: Setup Node.js for SonarCloud
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Set up Python for SonarCloud
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        cache: 'pip'
+    
+    - name: Install JavaScript dependencies
+      run: npm ci
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov
+    
+    - name: Download JavaScript coverage
+      uses: actions/download-artifact@v3
+      with:
+        name: javascript-coverage
+        path: coverage/
+    
+    - name: Download Python coverage
+      uses: actions/download-artifact@v3
+      with:
+        name: python-coverage
+        path: ./
+    
+    - name: Run tests for SonarCloud
+      run: |
+        # Run JavaScript tests
+        npm test -- --coverage --coverageReporters=lcov
+        # Run Python tests
+        pytest tests/ --cov=src/python --cov-report=xml
+    
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  sync-sonarqube-issues:
+    name: Sync SonarQube Issues
+    runs-on: ubuntu-latest
+    needs: [sonarcloud]
+    if: github.event_name == 'schedule' # Only run on scheduled triggers
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Install SonarQube sync tools
+      run: |
+        # Install any tools needed for SonarQube issue synchronization
+        echo "Installing SonarQube sync tools..."
+        # Add actual installation commands here based on your sync requirements
+    
+    - name: Sync issues
+      run: |
+        # Add your SonarQube issue sync logic here
+        echo "Syncing SonarQube issues..."
+        # This would typically involve API calls to SonarQube/SonarCloud
+    
+    - name: Create issue report
+      run: |
+        echo "Creating issue synchronization report..."
+        # Generate reports or notifications about the sync process
+
+  notify-completion:
+    name: Notify CI Completion
+    runs-on: ubuntu-latest
+    needs: [test-javascript, test-python, test-java, sonarcloud]
+    if: always()
+    
+    steps:
+    - name: Check CI Status
+      run: |
+        echo "JavaScript Tests: ${{ needs.test-javascript.result }}"
+        echo "Python Tests: ${{ needs.test-python.result }}"
+        echo "Java Tests: ${{ needs.test-java.result }}"
+        echo "SonarCloud Analysis: ${{ needs.sonarcloud.result }}"
+        
+        if [[ "${{ needs.test-javascript.result }}" == "success" && "${{ needs.test-python.result }}" == "success" ]]; then
+          echo "✅ All critical tests passed!"
+        else
+          echo "❌ Some tests failed"
+          exit 1
+        fi

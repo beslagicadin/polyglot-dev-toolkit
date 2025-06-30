@@ -185,7 +185,7 @@ class DataProcessor:
 
     def filter_by_age(self, min_age: int, max_age: int) -> List[Dict[str, Any]]:
         """Filter data by age range."""
-        return [item for item in self.data if min_age <= item.get("age", 0) <= max_age]
+        return [item for item in self.data if item.get("age") is not None and min_age <= item.get("age", 0) <= max_age]
 
     def get_statistics(self) -> Dict[str, float]:
         """Calculate basic statistics for numerical fields."""
