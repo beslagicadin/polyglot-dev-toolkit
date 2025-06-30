@@ -829,7 +829,7 @@ class TestMainFunctionExecution:
             cwd=cwd,
             capture_output=True,
             text=True,
-            timeout=30
+            timeout=60  # Increased timeout for CI environments
         )
         
         assert result.returncode == 0
@@ -902,7 +902,7 @@ class TestMainFunction:
             cwd=cwd,
             capture_output=True,
             text=True,
-            timeout=10
+            timeout=30  # Increased timeout for CI environments
         )
         
         # Should execute without errors
