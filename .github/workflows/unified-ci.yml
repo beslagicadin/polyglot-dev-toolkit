@@ -193,6 +193,10 @@ jobs:
       run: |
         if [ -f "pom.xml" ]; then
           mvn clean compile test-compile
+          # Create dependency directory even if no runtime dependencies exist
+          mkdir -p target/dependency
+          # Copy dependencies if any exist (this will include test dependencies)
+          mvn dependency:copy-dependencies -DincludeScope=test 2>/dev/null || true
         elif [ -f "build.gradle" ]; then
           ./gradlew compileJava compileTestJava
         else
