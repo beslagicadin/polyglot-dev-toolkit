@@ -639,6 +639,40 @@ class TestWebScraperWithMocks:
 class TestFileManagerEdgeCases:
     """Test FileManager edge cases."""
 
+    def test_organize_files_large_directory(self, tmp_path):
+        """Test organizing files with more than 100 files to trigger break condition."""
+        fm = FileManager()
+        
+        # Create more than 100 files to trigger the break on line 72
+        for i in range(105):
+            (tmp_path / f"file{i}.txt").write_text(f"content {i}")
+        
+        organized = fm.organize_files_by_extension(str(tmp_path))
+        
+        # Should have .txt files but limited by the break condition
+        assert ".txt" in organized
+        # The break should limit to 100 files processed
+        assert len(organized[".txt"]) <= 100
+
+    def test_organize_files_os_error(self, tmp_path, monkeypatch):
+        """Test organizing files when OSError occurs to cover lines 77-78."""
+        fm = FileManager()
+        
+        # Mock Path.iterdir to raise OSError
+        from pathlib import Path
+        original_iterdir = Path.iterdir
+        
+        def mock_iterdir(self):
+            raise OSError("Permission denied")
+        
+        monkeypatch.setattr(Path, "iterdir", mock_iterdir)
+        
+        # This should trigger the OSError handling on lines 77-78
+        organized = fm.organize_files_by_extension(str(tmp_path))
+        
+        # Should return empty dict due to error
+        assert organized == {}
+
     def test_calculate_file_hash_error_handling(self, tmp_path):
         """Test file hash calculation with permission error."""
         fm = FileManager()
@@ -701,6 +735,66 @@ class TestDataProcessorEdgeCases:
 
 class TestMainFunctionExecution:
     """Test main function and module execution paths."""
+
+    def test_main_function_file_manager_exception(self, monkeypatch):
+        """Test main function when FileManager raises exception to cover lines 445-446."""
+        from src.python.utils import FileManager
+        
+        # Mock FileManager.organize_files_by_extension to raise exception
+        original_method = FileManager.organize_files_by_extension
+        
+        def mock_organize(*args, **kwargs):
+            raise Exception("Simulated file manager error")
+        
+        monkeypatch.setattr(FileManager, "organize_files_by_extension", mock_organize)
+        
+        # Capture output
+        from io import StringIO
+        import sys
+        
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        
+        try:
+            from src.python.utils import main
+            main()
+            
+            output = captured_output.getvalue()
+            assert "File organization demo skipped:" in output
+        finally:
+            sys.stdout = sys.__stdout__
+            # Restore original method
+            FileManager.organize_files_by_extension = original_method
+
+    def test_main_function_webscraper_exception(self, monkeypatch):
+        """Test main function when WebScraper raises exception to cover lines 484-485."""
+        from src.python.utils import WebScraper
+        
+        # Mock WebScraper.check_url_status to raise exception
+        original_method = WebScraper.check_url_status
+        
+        def mock_check_url(*args, **kwargs):
+            raise Exception("Simulated network error")
+        
+        monkeypatch.setattr(WebScraper, "check_url_status", mock_check_url)
+        
+        # Capture output
+        from io import StringIO
+        import sys
+        
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        
+        try:
+            from src.python.utils import main
+            main()
+            
+            output = captured_output.getvalue()
+            assert "Web scraper demo skipped:" in output
+        finally:
+            sys.stdout = sys.__stdout__
+            # Restore original method
+            WebScraper.check_url_status = original_method
 
     def test_main_function_import_error(self, monkeypatch):
         """Test that main handles ImportError gracefully if psutil is not installed."""
