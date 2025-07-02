@@ -32,6 +32,13 @@ public class Utils {
     private static final Logger LOGGER = Logger.getLogger(Utils.class.getName());
     
     /**
+     * Private constructor to prevent instantiation of utility class.
+     */
+    private Utils() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
+    
+    /**
      * Calculate the nth Fibonacci number using dynamic programming
      * @param n Position in Fibonacci sequence
      * @return The nth Fibonacci number

@@ -268,11 +268,20 @@ public class UtilsTest {
     }
     
     @Test
-    @DisplayName("Test Utils constructor")
+    @DisplayName("Test Utils constructor throws exception")
     void testUtilsConstructor() {
-        // Test that Utils can be instantiated (covers constructor)
-        Utils utils = new Utils();
-        assertNotNull(utils);
+        // Test that Utils constructor throws UnsupportedOperationException
+        java.lang.reflect.InvocationTargetException exception = assertThrows(
+            java.lang.reflect.InvocationTargetException.class, () -> {
+                // Use reflection to access private constructor
+                java.lang.reflect.Constructor<Utils> constructor = Utils.class.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                constructor.newInstance();
+            });
+        
+        // Verify the wrapped exception is UnsupportedOperationException
+        assertTrue(exception.getCause() instanceof UnsupportedOperationException);
+        assertEquals("Utility class cannot be instantiated", exception.getCause().getMessage());
     }
     
     @Test

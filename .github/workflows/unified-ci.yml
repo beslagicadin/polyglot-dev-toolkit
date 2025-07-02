@@ -274,7 +274,7 @@ jobs:
         echo "Java Tests: ${{ needs.test-java.result }}"
         echo "SonarCloud Analysis: ${{ needs.sonarcloud.result }}"
         
-        if [[ "${{ needs.test-javascript.result }}" == "success" && "${{ needs.test-python.result }}" == "success" ]]; then
+        if [[ "${{ needs.test-javascript.result }}" == "success" && "${{ needs.test-python.result }}" == "success" && "${{ needs.test-java.result }}" == "success" ]]; then
           echo "✅ All critical tests passed!"
         else
           echo "❌ Some tests failed"
