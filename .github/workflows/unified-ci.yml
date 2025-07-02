@@ -331,7 +331,7 @@ jobs:
           
           # Create GitHub issue body
           GITHUB_BODY="## SonarCloud Issue Details
-          
+
 **Issue Key:** \`$ISSUE_KEY\`
 **Type:** $ISSUE_TYPE
 **Severity:** $ISSUE_SEVERITY
