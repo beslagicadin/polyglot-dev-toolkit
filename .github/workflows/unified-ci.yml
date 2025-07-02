@@ -221,6 +221,14 @@ jobs:
         npm test -- --coverage --coverageReporters=lcov
         # Run Python tests
         pytest tests/ --cov=src/python --cov-report=xml
+        # Run Java tests with coverage
+        if [ -f "pom.xml" ]; then
+          mvn test jacoco:report
+        elif [ -f "build.gradle" ]; then
+          ./gradlew test jacocoTestReport
+        else
+          echo "No Java build file found, skipping Java tests"
+        fi
     
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master
