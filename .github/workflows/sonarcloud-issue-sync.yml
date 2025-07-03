@@ -135,11 +135,9 @@ jobs:
         
         # Test with a simple issue first
         echo "Creating test issue to verify permissions..."
-        cat > test_issue_body.tmp << EOF
-This is a test issue created by the SonarCloud sync workflow to verify GitHub API permissions.
-
-If you see this issue, the basic issue creation is working.
-EOF
+        echo "This is a test issue created by the SonarCloud sync workflow to verify GitHub API permissions." > test_issue_body.tmp
+        echo "" >> test_issue_body.tmp
+        echo "If you see this issue, the basic issue creation is working." >> test_issue_body.tmp
         
         if TEST_ISSUE=$(gh issue create --title "[TEST] SonarCloud Sync Permission Test" --body-file test_issue_body.tmp --label "test" 2>&1); then
           echo "✅ Test issue created successfully: $TEST_ISSUE"
@@ -189,22 +187,20 @@ EOF
           echo "Sanitized title: '$GITHUB_TITLE'"
           
           # Create GitHub issue body using simpler approach
-          cat > issue_body.tmp << EOF
-## SonarCloud Issue Details
-
-**Issue Key:** \`$ISSUE_KEY\`  
-**Type:** $ISSUE_TYPE  
-**Severity:** $ISSUE_SEVERITY  
-**Status:** $ISSUE_STATUS  
-**Component:** \`$ISSUE_COMPONENT\`  
-**Line:** $ISSUE_LINE  
-
-**Message:** $ISSUE_MESSAGE  
-
----
-*This issue was automatically synchronized from SonarCloud.*  
-*SonarCloud Issue Key: $ISSUE_KEY*
-EOF
+          echo "## SonarCloud Issue Details" > issue_body.tmp
+          echo "" >> issue_body.tmp
+          echo "**Issue Key:** \`$ISSUE_KEY\`" >> issue_body.tmp
+          echo "**Type:** $ISSUE_TYPE" >> issue_body.tmp
+          echo "**Severity:** $ISSUE_SEVERITY" >> issue_body.tmp
+          echo "**Status:** $ISSUE_STATUS" >> issue_body.tmp
+          echo "**Component:** \`$ISSUE_COMPONENT\`" >> issue_body.tmp
+          echo "**Line:** $ISSUE_LINE" >> issue_body.tmp
+          echo "" >> issue_body.tmp
+          echo "**Message:** $ISSUE_MESSAGE" >> issue_body.tmp
+          echo "" >> issue_body.tmp
+          echo "---" >> issue_body.tmp
+          echo "*This issue was automatically synchronized from SonarCloud.*" >> issue_body.tmp
+          echo "*SonarCloud Issue Key: $ISSUE_KEY*" >> issue_body.tmp
           
           echo "Body file created, size: $(wc -c < issue_body.tmp) bytes"
           
