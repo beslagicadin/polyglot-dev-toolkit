@@ -118,13 +118,17 @@ jobs:
           echo "❌ Warning: temp file is empty!"
         fi
         
-        # Process first few issues for testing
+        # Process first few issues for testing - fix subshell variable persistence
         SYNCED_COUNT=0
         UPDATED_COUNT=0
         CREATED_COUNT=0
         
-        # Process up to 5 issues for testing
-        head -5 issues_temp.txt | while IFS= read -r issue; do
+        # Read issues into array to avoid subshell issues
+        mapfile -t issues_array < <(head -5 issues_temp.txt)
+        
+        echo "Processing ${#issues_array[@]} issues..."
+        
+        for issue in "${issues_array[@]}"; do
           echo "Processing issue line..."
           
           # Extract issue details with error checking and sanitization
@@ -176,7 +180,7 @@ jobs:
           SYNCED_COUNT=$((SYNCED_COUNT + 1))
         done
         
-        echo "Processed $SYNCED_COUNT issues for testing"
+        echo "Successfully processed $SYNCED_COUNT issues (Created: $CREATED_COUNT, Updated: $UPDATED_COUNT)"
         
         echo "" >> sync_report.md
         echo "## Summary" >> sync_report.md
