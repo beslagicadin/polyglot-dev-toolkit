@@ -91,7 +91,9 @@ jobs:
         UPDATED_COUNT=0
         CREATED_COUNT=0
         
-        # Process each SonarCloud issue using a while loop with process substitution
+        # Process each SonarCloud issue using a simple approach
+        jq -c '.issues[]' sonar_issues.json > issues_temp.txt
+        
         while IFS= read -r issue; do
           echo "Processing issue: $issue"
           
@@ -135,7 +137,7 @@ jobs:
           fi
           
           SYNCED_COUNT=$((SYNCED_COUNT + 1))
-        done < <(jq -c '.issues[]' sonar_issues.json)
+        done < issues_temp.txt
         
         echo "" >> sync_report.md
         echo "## Summary" >> sync_report.md
