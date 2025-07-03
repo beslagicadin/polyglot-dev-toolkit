@@ -41,8 +41,8 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y gh
     
-    - name: Fetch SonarCloud issues
-      id: sonar-issues
+    - name: Fetch and Sync SonarCloud Issues
+      shell: bash
       run: |
         echo "Fetching issues from SonarCloud..."
         
@@ -51,7 +51,6 @@ jobs:
         PROJECT_KEY="${GITHUB_ORG}_$(echo $GITHUB_REPOSITORY | cut -d'/' -f2)"
         
         echo "Using project key: $PROJECT_KEY"
-        echo "project_key=$PROJECT_KEY" >> $GITHUB_OUTPUT
         
         # Fetch issues from SonarCloud API
         # Note: You may need to adjust the project key format based on your SonarCloud setup
@@ -70,12 +69,12 @@ jobs:
         
         ISSUE_COUNT=$(echo "$SONAR_ISSUES_RESPONSE" | jq '.issues | length')
         echo "Found $ISSUE_COUNT SonarCloud issues"
-        echo "issue_count=$ISSUE_COUNT" >> $GITHUB_OUTPUT
-    
-    - name: Sync issues to GitHub
-      if: steps.sonar-issues.outputs.issue_count > 0
-      shell: bash
-      run: |
+        
+        if [ "$ISSUE_COUNT" -eq 0 ]; then
+          echo "No issues to sync"
+          exit 0
+        fi
+        
         echo "Syncing SonarCloud issues to GitHub..."
         
         # Authenticate with GitHub CLI
