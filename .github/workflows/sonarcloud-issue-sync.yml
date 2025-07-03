@@ -76,7 +76,6 @@ jobs:
       if: steps.sonar-issues.outputs.issue_count > 0
       shell: bash
       run: |
-        set -e
         echo "Syncing SonarCloud issues to GitHub..."
         
         # Authenticate with GitHub CLI
