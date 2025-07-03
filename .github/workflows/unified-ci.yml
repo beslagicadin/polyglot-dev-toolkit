@@ -330,20 +330,7 @@ jobs:
           GITHUB_TITLE="[SonarCloud] $ISSUE_TYPE: $ISSUE_MESSAGE"
           
           # Create GitHub issue body
-          GITHUB_BODY="## SonarCloud Issue Details
-
-**Issue Key:** \`$ISSUE_KEY\`  
-**Type:** $ISSUE_TYPE  
-**Severity:** $ISSUE_SEVERITY  
-**Status:** $ISSUE_STATUS  
-**Component:** \`$ISSUE_COMPONENT\`  
-**Line:** $ISSUE_LINE  
-
-**Message:** $ISSUE_MESSAGE  
-
----  
-*This issue was automatically synchronized from SonarCloud.*  
-*SonarCloud Issue Key: $ISSUE_KEY*"
+          GITHUB_BODY="## SonarCloud Issue Details\n\n**Issue Key:** \`\$ISSUE_KEY\`\n**Type:** \$ISSUE_TYPE\n**Severity:** \$ISSUE_SEVERITY\n**Status:** \$ISSUE_STATUS\n**Component:** \`\$ISSUE_COMPONENT\`\n**Line:** \$ISSUE_LINE\n\n**Message:** \$ISSUE_MESSAGE\n\n---\n*This issue was automatically synchronized from SonarCloud.*\n*SonarCloud Issue Key: \$ISSUE_KEY*"
           
           # Check if GitHub issue already exists (search by SonarCloud key)
           EXISTING_ISSUE=$(gh issue list --search "$ISSUE_KEY in:body" --json number,title,state --jq '.[0].number // empty')
