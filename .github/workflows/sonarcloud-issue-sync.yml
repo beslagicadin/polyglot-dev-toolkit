@@ -90,13 +90,34 @@ jobs:
         UPDATED_COUNT=0
         CREATED_COUNT=0
         
+        # Check if sonar_issues.json exists
+        if [ ! -f "sonar_issues.json" ]; then
+          echo "❌ Error: sonar_issues.json file not found!"
+          echo "Current directory: $(pwd)"
+          echo "Files in current directory:"
+          ls -la
+          exit 1
+        fi
+        
+        echo "✅ Found sonar_issues.json file"
+        echo "File size: $(wc -c < sonar_issues.json) bytes"
+        
         # Process each SonarCloud issue using a simple approach
         echo "Creating temp file from sonar_issues.json..."
-        jq -c '.issues[]' sonar_issues.json > issues_temp.txt
+        if ! jq -c '.issues[]' sonar_issues.json > issues_temp.txt; then
+          echo "❌ Error: Failed to process sonar_issues.json with jq"
+          echo "JSON content preview:"
+          head -5 sonar_issues.json
+          exit 1
+        fi
         
         echo "Checking temp file content..."
         echo "Lines in temp file: $(wc -l < issues_temp.txt)"
-        echo "First line: $(head -1 issues_temp.txt)"
+        if [ -s issues_temp.txt ]; then
+          echo "First line: $(head -1 issues_temp.txt)"
+        else
+          echo "❌ Warning: temp file is empty!"
+        fi
         
         while IFS= read -r issue; do
           echo "Processing issue: $issue"
