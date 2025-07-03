@@ -91,7 +91,12 @@ jobs:
         CREATED_COUNT=0
         
         # Process each SonarCloud issue using a simple approach
+        echo "Creating temp file from sonar_issues.json..."
         jq -c '.issues[]' sonar_issues.json > issues_temp.txt
+        
+        echo "Checking temp file content..."
+        echo "Lines in temp file: $(wc -l < issues_temp.txt)"
+        echo "First line: $(head -1 issues_temp.txt)"
         
         while IFS= read -r issue; do
           echo "Processing issue: $issue"
