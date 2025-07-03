@@ -74,7 +74,9 @@ jobs:
     
     - name: Sync issues to GitHub
       if: steps.sonar-issues.outputs.issue_count > 0
+      shell: bash
       run: |
+        set -e
         echo "Syncing SonarCloud issues to GitHub..."
         
         # Authenticate with GitHub CLI
@@ -89,9 +91,11 @@ jobs:
         UPDATED_COUNT=0
         CREATED_COUNT=0
         
-        # Process each SonarCloud issue
-        cat sonar_issues.json | jq -c '.issues[]' | while read -r issue; do
-          # Extract issue details
+        # Process each SonarCloud issue using a while loop with process substitution
+        while IFS= read -r issue; do
+          echo "Processing issue: $issue"
+          
+          # Extract issue details with error checking
           ISSUE_KEY=$(echo "$issue" | jq -r '.key')
           ISSUE_TYPE=$(echo "$issue" | jq -r '.type')
           ISSUE_SEVERITY=$(echo "$issue" | jq -r '.severity')
@@ -100,6 +104,8 @@ jobs:
           ISSUE_LINE=$(echo "$issue" | jq -r '.line // "N/A"')
           ISSUE_STATUS=$(echo "$issue" | jq -r '.status')
           
+          echo "Found issue: $ISSUE_KEY ($ISSUE_TYPE)"
+          
           # Create GitHub issue title
           GITHUB_TITLE="[SonarCloud] $ISSUE_TYPE: $ISSUE_MESSAGE"
           
@@ -107,28 +113,37 @@ jobs:
           GITHUB_BODY="## SonarCloud Issue Details\n\n**Issue Key:** \`$ISSUE_KEY\`\n**Type:** $ISSUE_TYPE\n**Severity:** $ISSUE_SEVERITY\n**Status:** $ISSUE_STATUS\n**Component:** \`$ISSUE_COMPONENT\`\n**Line:** $ISSUE_LINE\n\n**Message:** $ISSUE_MESSAGE\n\n---\n*This issue was automatically synchronized from SonarCloud.*\n*SonarCloud Issue Key: $ISSUE_KEY*"
           
           # Check if GitHub issue already exists (search by SonarCloud key)
-          EXISTING_ISSUE=$(gh issue list --search "$ISSUE_KEY in:body" --json number,title,state --jq '.[0].number // empty')
+          echo "Checking for existing issue with key: $ISSUE_KEY"
+          EXISTING_ISSUE=$(gh issue list --search "$ISSUE_KEY in:body" --json number,title,state --jq '.[0].number // empty' || echo "")
           
-          if [ -n "$EXISTING_ISSUE" ]; then
+          if [ -n "$EXISTING_ISSUE" ] && [ "$EXISTING_ISSUE" != "" ]; then
             echo "Updating existing GitHub issue #$EXISTING_ISSUE for SonarCloud issue $ISSUE_KEY"
-            gh issue edit "$EXISTING_ISSUE" --title "$GITHUB_TITLE" --body "$GITHUB_BODY"
-            echo "- Updated issue #$EXISTING_ISSUE: $ISSUE_KEY" >> sync_report.md
-            UPDATED_COUNT=$((UPDATED_COUNT + 1))
+            if gh issue edit "$EXISTING_ISSUE" --title "$GITHUB_TITLE" --body "$GITHUB_BODY"; then
+              echo "- Updated issue #$EXISTING_ISSUE: $ISSUE_KEY" >> sync_report.md
+              UPDATED_COUNT=$((UPDATED_COUNT + 1))
+            else
+              echo "❌ Failed to update issue #$EXISTING_ISSUE"
+            fi
           else
             echo "Creating new GitHub issue for SonarCloud issue $ISSUE_KEY"
-            NEW_ISSUE=$(gh issue create --title "$GITHUB_TITLE" --body "$GITHUB_BODY" --label "sonarcloud,technical-debt")
-            echo "- Created new issue $NEW_ISSUE: $ISSUE_KEY" >> sync_report.md
-            CREATED_COUNT=$((CREATED_COUNT + 1))
+            if NEW_ISSUE=$(gh issue create --title "$GITHUB_TITLE" --body "$GITHUB_BODY" --label "sonarcloud,technical-debt"); then
+              echo "- Created new issue $NEW_ISSUE: $ISSUE_KEY" >> sync_report.md
+              CREATED_COUNT=$((CREATED_COUNT + 1))
+            else
+              echo "❌ Failed to create issue for $ISSUE_KEY"
+            fi
           fi
           
           SYNCED_COUNT=$((SYNCED_COUNT + 1))
-        done
+        done < <(jq -c '.issues[]' sonar_issues.json)
         
         echo "" >> sync_report.md
         echo "## Summary" >> sync_report.md
         echo "- Total issues processed: $SYNCED_COUNT" >> sync_report.md
         echo "- New issues created: $CREATED_COUNT" >> sync_report.md
         echo "- Existing issues updated: $UPDATED_COUNT" >> sync_report.md
+        
+        echo "✅ Processed $SYNCED_COUNT issues, created $CREATED_COUNT new, updated $UPDATED_COUNT existing"
     
     - name: Create issue report
       run: |
