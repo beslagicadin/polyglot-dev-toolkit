@@ -118,50 +118,101 @@ jobs:
           echo "❌ Warning: temp file is empty!"
         fi
         
-        while IFS= read -r issue; do
-          echo "Processing issue: $issue"
-          
-          # Extract issue details with error checking
-          ISSUE_KEY=$(echo "$issue" | jq -r '.key')
-          ISSUE_TYPE=$(echo "$issue" | jq -r '.type')
-          ISSUE_SEVERITY=$(echo "$issue" | jq -r '.severity')
-          ISSUE_MESSAGE=$(echo "$issue" | jq -r '.message')
-          ISSUE_COMPONENT=$(echo "$issue" | jq -r '.component')
-          ISSUE_LINE=$(echo "$issue" | jq -r '.line // "N/A"')
-          ISSUE_STATUS=$(echo "$issue" | jq -r '.status')
-          
-          echo "Found issue: $ISSUE_KEY ($ISSUE_TYPE)"
-          
-          # Create GitHub issue title
-          GITHUB_TITLE="[SonarCloud] $ISSUE_TYPE: $ISSUE_MESSAGE"
-          
-          # Create GitHub issue body
-          GITHUB_BODY="## SonarCloud Issue Details\n\n**Issue Key:** \`$ISSUE_KEY\`\n**Type:** $ISSUE_TYPE\n**Severity:** $ISSUE_SEVERITY\n**Status:** $ISSUE_STATUS\n**Component:** \`$ISSUE_COMPONENT\`\n**Line:** $ISSUE_LINE\n\n**Message:** $ISSUE_MESSAGE\n\n---\n*This issue was automatically synchronized from SonarCloud.*\n*SonarCloud Issue Key: $ISSUE_KEY*"
-          
-          # Check if GitHub issue already exists (search by SonarCloud key)
-          echo "Checking for existing issue with key: $ISSUE_KEY"
-          EXISTING_ISSUE=$(gh issue list --search "$ISSUE_KEY in:body" --json number,title,state --jq '.[0].number // empty' || echo "")
-          
-          if [ -n "$EXISTING_ISSUE" ] && [ "$EXISTING_ISSUE" != "" ]; then
-            echo "Updating existing GitHub issue #$EXISTING_ISSUE for SonarCloud issue $ISSUE_KEY"
-            if gh issue edit "$EXISTING_ISSUE" --title "$GITHUB_TITLE" --body "$GITHUB_BODY"; then
-              echo "- Updated issue #$EXISTING_ISSUE: $ISSUE_KEY" >> sync_report.md
-              UPDATED_COUNT=$((UPDATED_COUNT + 1))
-            else
-              echo "❌ Failed to update issue #$EXISTING_ISSUE"
-            fi
-          else
-            echo "Creating new GitHub issue for SonarCloud issue $ISSUE_KEY"
-            if NEW_ISSUE=$(gh issue create --title "$GITHUB_TITLE" --body "$GITHUB_BODY" --label "sonarcloud,technical-debt"); then
-              echo "- Created new issue $NEW_ISSUE: $ISSUE_KEY" >> sync_report.md
-              CREATED_COUNT=$((CREATED_COUNT + 1))
-            else
-              echo "❌ Failed to create issue for $ISSUE_KEY"
-            fi
-          fi
-          
-          SYNCED_COUNT=$((SYNCED_COUNT + 1))
-        done < issues_temp.txt
+        # Create a temporary script to handle the issue processing
+        # This avoids subshell issues with variable persistence
+        cat > process_issues.sh << 'EOF'
+#!/bin/bash
+SYNCED_COUNT=0
+UPDATED_COUNT=0
+CREATED_COUNT=0
+
+while IFS= read -r issue; do
+  echo "Processing issue line..."
+  
+  # Extract issue details with error checking and sanitization
+  ISSUE_KEY=$(echo "$issue" | jq -r '.key' | tr -d '\n\r')
+  ISSUE_TYPE=$(echo "$issue" | jq -r '.type' | tr -d '\n\r')
+  ISSUE_SEVERITY=$(echo "$issue" | jq -r '.severity' | tr -d '\n\r')
+  ISSUE_MESSAGE=$(echo "$issue" | jq -r '.message' | tr -d '\n\r' | head -c 200)
+  ISSUE_COMPONENT=$(echo "$issue" | jq -r '.component' | tr -d '\n\r')
+  ISSUE_LINE=$(echo "$issue" | jq -r '.line // "N/A"' | tr -d '\n\r')
+  ISSUE_STATUS=$(echo "$issue" | jq -r '.status' | tr -d '\n\r')
+  
+  echo "Found issue: $ISSUE_KEY ($ISSUE_TYPE)"
+  
+  # Sanitize and truncate title to avoid API issues
+  SAFE_MESSAGE=$(echo "$ISSUE_MESSAGE" | head -c 100)
+  GITHUB_TITLE="[SonarCloud] $ISSUE_TYPE: $SAFE_MESSAGE"
+  
+  # Create GitHub issue body using a temp file to avoid escaping issues
+  cat > issue_body.tmp << BODY_EOF
+## SonarCloud Issue Details
+
+**Issue Key:** \`$ISSUE_KEY\`
+**Type:** $ISSUE_TYPE
+**Severity:** $ISSUE_SEVERITY
+**Status:** $ISSUE_STATUS
+**Component:** \`$ISSUE_COMPONENT\`
+**Line:** $ISSUE_LINE
+
+**Message:** $ISSUE_MESSAGE
+
+---
+*This issue was automatically synchronized from SonarCloud.*
+*SonarCloud Issue Key: $ISSUE_KEY*
+BODY_EOF
+  
+  # Check if GitHub issue already exists (search by SonarCloud key)
+  echo "Checking for existing issue with key: $ISSUE_KEY"
+  EXISTING_ISSUE=$(gh issue list --search "$ISSUE_KEY in:body" --json number --jq '.[0].number // empty' 2>/dev/null || echo "")
+  
+  if [ -n "$EXISTING_ISSUE" ] && [ "$EXISTING_ISSUE" != "null" ] && [ "$EXISTING_ISSUE" != "" ]; then
+    echo "Updating existing GitHub issue #$EXISTING_ISSUE for SonarCloud issue $ISSUE_KEY"
+    if gh issue edit "$EXISTING_ISSUE" --title "$GITHUB_TITLE" --body-file issue_body.tmp 2>/dev/null; then
+      echo "✅ Updated issue #$EXISTING_ISSUE: $ISSUE_KEY" >> sync_report.md
+      UPDATED_COUNT=$((UPDATED_COUNT + 1))
+    else
+      echo "❌ Failed to update issue #$EXISTING_ISSUE for $ISSUE_KEY"
+    fi
+  else
+    echo "Creating new GitHub issue for SonarCloud issue $ISSUE_KEY"
+    if NEW_ISSUE=$(gh issue create --title "$GITHUB_TITLE" --body-file issue_body.tmp --label "sonarcloud,technical-debt" 2>/dev/null); then
+      echo "✅ Created new issue $NEW_ISSUE for $ISSUE_KEY" >> sync_report.md
+      CREATED_COUNT=$((CREATED_COUNT + 1))
+    else
+      echo "❌ Failed to create issue for $ISSUE_KEY"
+      echo "Debug - Title: $GITHUB_TITLE"
+      echo "Debug - Body preview:" 
+      head -3 issue_body.tmp
+    fi
+  fi
+  
+  # Clean up temp file
+  rm -f issue_body.tmp
+  
+  SYNCED_COUNT=$((SYNCED_COUNT + 1))
+  
+  # Limit processing to first 5 issues for testing
+  if [ "$SYNCED_COUNT" -ge 5 ]; then
+    echo "Limiting to 5 issues for testing"
+    break
+  fi
+done < issues_temp.txt
+
+echo "Final counts: Synced=$SYNCED_COUNT, Created=$CREATED_COUNT, Updated=$UPDATED_COUNT"
+echo "$SYNCED_COUNT" > synced_count.txt
+echo "$CREATED_COUNT" > created_count.txt
+echo "$UPDATED_COUNT" > updated_count.txt
+EOF
+
+        # Make the script executable and run it
+        chmod +x process_issues.sh
+        ./process_issues.sh
+        
+        # Read the counts back from files
+        SYNCED_COUNT=$(cat synced_count.txt 2>/dev/null || echo "0")
+        CREATED_COUNT=$(cat created_count.txt 2>/dev/null || echo "0")
+        UPDATED_COUNT=$(cat updated_count.txt 2>/dev/null || echo "0")
         
         echo "" >> sync_report.md
         echo "## Summary" >> sync_report.md
