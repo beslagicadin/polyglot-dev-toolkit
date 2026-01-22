@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-yellow)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![Java](https://img.shields.io/badge/Java-11%2B-red)](https://openjdk.java.net/)
+[![Java](https://img.shields.io/badge/Java-17%2B-red)](https://openjdk.java.net/)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=beslagicadin_polyglot-dev-toolkit&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=beslagicadin_polyglot-dev-toolkit)
 
 > **A comprehensive, production-ready toolkit showcasing modern development practices across Python, JavaScript, and Java ecosystems.**
@@ -78,7 +78,7 @@ polyglot-dev-toolkit/
 
 ### Prerequisites
 - **Python 3.8+** for Python utilities
-- **Node.js 16+** for JavaScript utilities
+- **Node.js 18+** for JavaScript utilities
 - **Java 11+** for Java utilities
 - **Git** for version control
 
