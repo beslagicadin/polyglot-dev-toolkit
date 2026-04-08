@@ -2,7 +2,7 @@
 
 [![CI/CD Pipeline](https://github.com/beslagicadin/polyglot-dev-toolkit/workflows/Continuous%20Integration/badge.svg)](https://github.com/beslagicadin/polyglot-dev-toolkit/actions)
 [![Code Coverage](https://codecov.io/gh/beslagicadin/polyglot-dev-toolkit/branch/master/graph/badge.svg)](https://codecov.io/gh/beslagicadin/polyglot-dev-toolkit)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-yellow)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Java](https://img.shields.io/badge/Java-17%2B-red)](https://openjdk.java.net/)
@@ -144,7 +144,7 @@ Contributions are welcome! Please read our [Contributing Guidelines](./CONTRIBUT
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+This software is all rights reserved. Use, copying, modification, or distribution requires prior written permission from the author. See the [LICENSE](LICENSE) file for full terms or contact [beslagicadin@gmail.com](mailto:beslagicadin@gmail.com) to request permission.
 
 ## 👨‍💻 Author
 
